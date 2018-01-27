@@ -14,7 +14,7 @@
 
 #if defined(WIN32)
 
-        #if defined(_MSC_VER)
+	#if defined(_MSC_VER)
 
 		typedef         __int8			int8_t; //conflict in MinGW: typedef signed char int8_t
 		typedef         unsigned __int8		uint8_t;
@@ -38,7 +38,7 @@
 //		typedef         long long int		int64_t;
 //		typedef         unsigned long long int	uint64_t;
 
-        #endif
+	#endif
 
 #elif defined(__linux__)
 
@@ -82,18 +82,18 @@
 					(((uint32_t)(A) & 0x00ff0000) >> 8)  | \
 					(((uint32_t)(A) & 0x0000ff00) << 8)  | \
 					(((uint32_t)(A) & 0x000000ff) << 24) \
-                                        )
+					)
 
-        #define         _LE64(A)        (\
-                                        (((uint64_t)(A) & 0xff00000000000000) >> 56) |\
-                                        (((uint64_t)(A) & 0x00ff000000000000) >> 40) |\
-                                        (((uint64_t)(A) & 0x0000ff0000000000) >> 24) |\
-                                        (((uint64_t)(A) & 0x000000ff00000000) >> 8)  |\
-                                        (((uint64_t)(A) & 0x00000000ff000000) << 8)  |\
-                                        (((uint64_t)(A) & 0x0000000000ff0000) << 24) |\
-                                        (((uint64_t)(A) & 0x000000000000ff00) << 40) |\
-                                        (((uint64_t)(A) & 0x00000000000000ff) << 56) \
-                                        )
+	#define         _LE64(A)        (\
+					(((uint64_t)(A) & 0xff00000000000000) >> 56) |\
+					(((uint64_t)(A) & 0x00ff000000000000) >> 40) |\
+					(((uint64_t)(A) & 0x0000ff0000000000) >> 24) |\
+					(((uint64_t)(A) & 0x000000ff00000000) >> 8)  |\
+					(((uint64_t)(A) & 0x00000000ff000000) << 8)  |\
+					(((uint64_t)(A) & 0x0000000000ff0000) << 24) |\
+					(((uint64_t)(A) & 0x000000000000ff00) << 40) |\
+					(((uint64_t)(A) & 0x00000000000000ff) << 56) \
+					)
 
 #elif defined(x86) || defined(i386) || defined(amd64) || defined(WIN32) || defined(__APPLE__)
 

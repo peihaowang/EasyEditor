@@ -21,12 +21,12 @@ QColorPicker::QColorPicker(QWidget* parent)
 	m_pBtnTransparent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 	m_pBtnTransparent->setAutoRaise(true);
 #if defined(Q_OS_MAC)
-    m_pBtnTransparent->setStyleSheet("QToolButton{background-color: transparent; border: 0px none transparent; padding: 2px;}"
-        "QToolButton::hover{background-color: rgba(200, 200, 200, 150); border: 1px solid gray; border-radius: 2px;}"
-        "QToolButton::pressed{background-color: rgba(150, 150, 150, 150); border: 1px solid gray; border-radius: 2px;}"
-    );
+	m_pBtnTransparent->setStyleSheet("QToolButton{background-color: transparent; border: 0px none transparent; padding: 2px;}"
+		"QToolButton::hover{background-color: rgba(200, 200, 200, 150); border: 1px solid gray; border-radius: 2px;}"
+		"QToolButton::pressed{background-color: rgba(150, 150, 150, 150); border: 1px solid gray; border-radius: 2px;}"
+	);
 #endif
-    m_pButtonsGroup->addButton(m_pBtnTransparent);
+	m_pButtonsGroup->addButton(m_pBtnTransparent);
 
 	m_pGridLayout = new QGridLayout;
 	m_pGridLayout->setAlignment(Qt::AlignCenter);
@@ -49,10 +49,10 @@ QColorPicker::QColorPicker(QWidget* parent)
 	pMoreColorBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 	pMoreColorBtn->setAutoRaise(true);
 #if defined(Q_OS_MAC)
-    pMoreColorBtn->setStyleSheet("QToolButton{background-color: transparent; border: 0px none transparent; padding: 2px;}"
-        "QToolButton::hover{background-color: rgba(200, 200, 200, 150); border: 1px solid gray; border-radius: 2px;}"
-        "QToolButton::pressed{background-color: rgba(150, 150, 150, 150); border: 1px solid gray; border-radius: 2px;}"
-    );
+	pMoreColorBtn->setStyleSheet("QToolButton{background-color: transparent; border: 0px none transparent; padding: 2px;}"
+		"QToolButton::hover{background-color: rgba(200, 200, 200, 150); border: 1px solid gray; border-radius: 2px;}"
+		"QToolButton::pressed{background-color: rgba(150, 150, 150, 150); border: 1px solid gray; border-radius: 2px;}"
+	);
 #endif
 
 	QVBoxLayout* pMainLayout = new QVBoxLayout;

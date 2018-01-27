@@ -50,7 +50,7 @@ protected:
 	QAction *			m_pActionBold;
 	QAction *			m_pActionItalic;
 	QAction *			m_pActionUnderline;
-    QMenuUnderline *	m_pMenuUnderline;
+	QMenuUnderline *		m_pMenuUnderline;
 	QAction *			m_pActionOverline;
 	QAction *			m_pActionStrikeOut;
 	QAction *			m_pActionSubscript;
@@ -73,7 +73,7 @@ protected:
 
 	QAction *			m_pActionInsOrderedList;
 	QAction *			m_pActionInsUnorderedList;
-    QActionGroup *		m_pActionGrpBlockList;
+	QActionGroup *		m_pActionGrpBlockList;
 
 	QAction *			m_pActionInsImage;
 	QAction *			m_pActionRotateImage;

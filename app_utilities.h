@@ -99,11 +99,11 @@ public:
 		if(sSuf.isEmpty()) sSuf="tmp";
 		do{
 			QString sName=QString("%1%2_%3.%4")
-				      .arg(sPre)
-				      .arg(time(NULL), 0, 16)
-				      .arg(qrand(), 0, 16)
-				      .arg(sSuf)
-				      ;
+					.arg(sPre)
+					.arg(time(NULL), 0, 16)
+					.arg(qrand(), 0, 16)
+					.arg(sSuf)
+					;
 			QFileInfo f(m_sTmpDir, sName);
 			if(!f.exists()){
 				sTmpFn=f.filePath();
