@@ -9,7 +9,7 @@
         <file>images/btn_subscript.png</file>
         <file>images/btn_superscript.png</file>
         <file>images/btn_underline.png</file>
-	<file>images/btn_undo.png</file>
+        <file>images/btn_undo.png</file>
         <file>images/btn_overline.png</file>
         <file>images/btn_justifycenter.png</file>
         <file>images/btn_justifyleft.png</file>
@@ -50,5 +50,10 @@
         <file>images/btn_find.png</file>
         <file>images/btn_replace.png</file>
         <file>images/btn_para_margin.png</file>
+        <file>images/btn_newfile.svg</file>
+        <file>images/btn_bold.svg</file>
+        <file>images/btn_italic.svg</file>
+        <file>images/btn_open.svg</file>
+        <file>images/btn_save.svg</file>
     </qresource>
 </RCC>

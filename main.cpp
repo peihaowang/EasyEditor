@@ -8,6 +8,10 @@ int main(int argc, char *argv[])
 {
 
 	QApplication a(argc, argv);
+#if defined(Q_OS_MAC)
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+    QApplication::setAttribute(Qt::AA_DontShowIconsInMenus, true);
+#endif
 
 	{
 		QString sIniFn = _CLocalFile::changeExtension(QCoreApplication::applicationFilePath(), "ini");

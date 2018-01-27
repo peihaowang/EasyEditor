@@ -1,4 +1,5 @@
-#include "MainWindow.h"
+#include <QSvgRenderer>
+
 #include "common_headers.h"
 #include "MyRichEdit.h"
 #include "PanelFindReplace.h"
@@ -7,6 +8,8 @@
 
 #include "MenuColor.h"
 #include "MenuUnderline.h"
+
+#include "MainWindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
 	: QMainWindow(parent)
@@ -43,27 +46,27 @@ MainWindow::MainWindow(QWidget *parent)
 	pStatusBar->setSizeGripEnabled(true);
 	pStatusBar->setVisible(true);
 
-	m_pDisplayDefault = new QLabel("Rich Text Edit Ver 1.x - By Peter Wang", this);
+    m_pDisplayDefault = new QLabel("EasyEditor 1.0.0", this);
 	pStatusBar->addWidget(m_pDisplayDefault);
 	m_pDisplayExtraInfo = new QLabel(this);
 	pStatusBar->addPermanentWidget(m_pDisplayExtraInfo);
 
 	m_pActionNew = new QAction(this);
 	m_pActionNew->setText("New File ...");
-	m_pActionNew->setIcon(QIcon(":/images/btn_newfile.png"));
-	m_pActionNew->setShortcut(QKeySequence("Ctrl+N"));
+    m_pActionNew->setIcon(QIcon(":/images/btn_newfile.svg"));
+    m_pActionNew->setShortcut(QKeySequence("Ctrl+N"));
 	QObject::connect(m_pActionNew, SIGNAL(triggered(bool)), this, SLOT(onNewFile()));
 
 	m_pActionOpen = new QAction(this);
 	m_pActionOpen->setText("Open File ...");
-	m_pActionOpen->setIcon(QIcon(":/images/btn_open.png"));
+    m_pActionOpen->setIcon(QIcon(":/images/btn_open.svg"));
 	m_pActionOpen->setShortcut(QKeySequence("Ctrl+O"));
 	QObject::connect(m_pActionOpen, SIGNAL(triggered(bool)), this, SLOT(onOpenFile()));
 
 	m_pActionSave = new QAction(this);
 	m_pActionSave->setText("Save File");
 	m_pActionSave->setEnabled(false);
-	m_pActionSave->setIcon(QIcon(":/images/btn_save.png"));
+    m_pActionSave->setIcon(QIcon(":/images/btn_save.svg"));
 	m_pActionSave->setShortcut(QKeySequence("Ctrl+S"));
 	QObject::connect(m_pActionSave, SIGNAL(triggered(bool)), this, SLOT(onSaveFile()));
 
@@ -109,17 +112,17 @@ MainWindow::MainWindow(QWidget *parent)
 	m_pActionBold = new QAction(this);
 	m_pActionBold->setCheckable(true);
 	m_pActionBold->setText("Bold");
-	m_pActionBold->setIcon(QIcon(":/images/btn_bold.png"));
+    m_pActionBold->setIcon(QIcon(":/images/btn_bold.svg"));
 
 	m_pActionItalic = new QAction(this);
 	m_pActionItalic->setCheckable(true);
 	m_pActionItalic->setText("Italic");
-	m_pActionItalic->setIcon(QIcon(":/images/btn_italic.png"));
+    m_pActionItalic->setIcon(QIcon(":/images/btn_italic.svg"));
 
 	m_pActionUnderline = new QAction(this);
 	m_pActionUnderline->setCheckable(true);
 	m_pActionUnderline->setText("Underline");
-	m_pActionUnderline->setIcon(QIcon(":/images/btn_underline.png"));
+    m_pActionUnderline->setIcon(QIcon(":/images/btn_underline.svg"));
 	QObject::connect(m_pActionUnderline, SIGNAL(triggered(bool)), this, SLOT(onUnderline()));
 	QToolButton* pBtnUnderline = new QToolButton(this);
 	pBtnUnderline->setDefaultAction(m_pActionUnderline);
@@ -135,22 +138,22 @@ MainWindow::MainWindow(QWidget *parent)
 	m_pActionOverline = new QAction(this);
 	m_pActionOverline->setCheckable(true);
 	m_pActionOverline->setText("Overline");
-	m_pActionOverline->setIcon(QIcon(":/images/btn_overline.png"));
+    m_pActionOverline->setIcon(QIcon(":/images/btn_overline.svg"));
 
 	m_pActionStrikeOut = new QAction(this);
 	m_pActionStrikeOut->setCheckable(true);
 	m_pActionStrikeOut->setText("Strike Out");
-	m_pActionStrikeOut->setIcon(QIcon(":/images/btn_strikeout.png"));
+    m_pActionStrikeOut->setIcon(QIcon(":/images/btn_strikeout.svg"));
 
 	m_pActionSubscript = new QAction(this);
 	m_pActionSubscript->setCheckable(true);
 	m_pActionSubscript->setText("Subscript");
-	m_pActionSubscript->setIcon(QIcon(":/images/btn_subscript.png"));
+    m_pActionSubscript->setIcon(QIcon(":/images/btn_subscript.svg"));
 
 	m_pActionSuperscript = new QAction(this);
 	m_pActionSuperscript->setCheckable(true);
 	m_pActionSuperscript->setText("Superscript");
-	m_pActionSuperscript->setIcon(QIcon(":/images/btn_superscript.png"));
+    m_pActionSuperscript->setIcon(QIcon(":/images/btn_superscript.svg"));
 
 	m_pComboTextFamily = new QFontComboBox(this);
 	m_pComboTextFamily->setMaxVisibleItems(20);
@@ -377,28 +380,95 @@ MainWindow::MainWindow(QWidget *parent)
 	m_pActionCancelHyperlink->setIcon(QIcon(":/images/btn_hyperlink_cancel.png"));
 	QObject::connect(m_pActionCancelHyperlink, SIGNAL(triggered(bool)), this, SLOT(onCancelHyperlink()));
 
-#if defined(Q_OS_MAC)
-//      QToolBar* pTB=new QUnifiedToolBar(this);
-	QToolBar* pTB = QMainWindow::addToolBar("General");
-	pTB->setVisible(true);
-#else
-	QToolBar* pTB = QMainWindow::addToolBar("General");
-#endif
+    //Menubar
+    QMenuBar* pMB = QMainWindow::menuBar();
+    {
+        //File menu
+        QMenu* pMenu = pMB->addMenu("&File");
+        pMenu->addAction(m_pActionNew);
+        pMenu->addAction(m_pActionOpen);
+        pMenu->addAction(m_pActionSave);
+    }
+    {
+        //Edit menu
+        QMenu* pMenu = pMB->addMenu("&Edit");
+        pMenu->addAction(m_pActionUndo);
+        pMenu->addAction(m_pActionRedo);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionCut);
+        pMenu->addAction(m_pActionCopy);
+        pMenu->addAction(m_pActionPaste);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionFindText);
+        pMenu->addAction(m_pActionReplaceText);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionEditHyperlink);
+        pMenu->addAction(m_pActionCancelHyperlink);
+    }
+    {
+        //Format menu
+        QMenu* pMenu = pMB->addMenu("&Format");
+        pMenu->addAction(m_pActionBold);
+        pMenu->addAction(m_pActionItalic);
+        pMenu->addAction(m_pActionUnderline);
+        pMenu->addAction(m_pActionOverline);
+        pMenu->addAction(m_pActionStrikeOut);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionSubscript);
+        pMenu->addAction(m_pActionSuperscript);
+    }
+    {
+        //Paragraph menu
+        QMenu* pMenu = pMB->addMenu("&Paragraph");
+        pMenu->addAction(m_pActionJustifyLeft);
+        pMenu->addAction(m_pActionJustifyCenter);
+        pMenu->addAction(m_pActionJustifyRight);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionOutdent);
+        pMenu->addAction(m_pActionIndent);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionInsOrderedList);
+        pMenu->addAction(m_pActionInsUnorderedList);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionLineSpacingx1);
+        pMenu->addAction(m_pActionLineSpacingx15);
+        pMenu->addAction(m_pActionLineSpacingx2);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionParaMargin);
+    }
+    {
+        //Image menu
+        QMenu* pMenu = pMB->addMenu("&Image");
+        pMenu->addAction(m_pActionInsImage);
+        pMenu->addAction(m_pActionRotateImage);
+        pMenu->addAction(m_pActionScaleImage);
+    }
+    {
+        //Table menu
+        QMenu* pMenu = pMB->addMenu("&Table");
+        pMenu->addAction(m_pActionInsTable);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionInsRowBefore);
+        pMenu->addAction(m_pActionInsRowAfter);
+        pMenu->addAction(m_pActionInsColBefore);
+        pMenu->addAction(m_pActionInsColAfter);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionRemoveRows);
+        pMenu->addAction(m_pActionRemoveCols);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionMergeCells);
+        pMenu->addAction(m_pActionSplitCells);
+        pMenu->addSeparator();
+        pMenu->addAction(m_pActionWidenCols);
+        pMenu->addAction(m_pActionNarrowCols);
+    }
 
-	pTB->setIconSize(QSize(16, 16));
+    //Toolbar
+    QToolBar* pTB = QMainWindow::addToolBar("General");
+    pTB->setIconSize(QSize(18, 18));
 	pTB->addAction(m_pActionNew);
 	pTB->addAction(m_pActionOpen);
 	pTB->addAction(m_pActionSave);
-	pTB->addSeparator();
-	pTB->addAction(m_pActionUndo);
-	pTB->addAction(m_pActionRedo);
-	pTB->addSeparator();
-	pTB->addAction(m_pActionCut);
-	pTB->addAction(m_pActionCopy);
-	pTB->addAction(m_pActionPaste);
-	pTB->addSeparator();
-	pTB->addAction(m_pActionFindText);
-	pTB->addAction(m_pActionReplaceText);
 	pTB->addSeparator();
 	pTB->addAction(m_pActionBold);
 	pTB->addAction(m_pActionItalic);
@@ -414,8 +484,6 @@ MainWindow::MainWindow(QWidget *parent)
 	pTB->addSeparator();
 	pTB->addWidget(m_pBtnTextForeColor);
 	pTB->addWidget(m_pBtnTextBackColor);
-	pTB->addSeparator();
-	pTB->addAction(m_pActionParaMargin);
 	pTB->addSeparator();
 	pTB->addAction(m_pActionJustifyLeft);
 	pTB->addAction(m_pActionJustifyCenter);
@@ -436,23 +504,13 @@ MainWindow::MainWindow(QWidget *parent)
 	pTB->addAction(m_pActionScaleImage);
 	pTB->addSeparator();
 	pTB->addAction(m_pActionInsTable);
-	pTB->addAction(m_pActionInsRowBefore);
 	pTB->addAction(m_pActionInsRowAfter);
-	pTB->addAction(m_pActionInsColBefore);
-	pTB->addAction(m_pActionInsColAfter);
 	pTB->addAction(m_pActionRemoveRows);
-	pTB->addAction(m_pActionRemoveCols);
-	pTB->addAction(m_pActionMergeCells);
-	pTB->addAction(m_pActionSplitCells);
-	pTB->addWidget(m_pBtnTableBorderColor);
-	pTB->addWidget(m_pBtnCellBackColor);
 	pTB->addAction(m_pActionWidenCols);
 	pTB->addAction(m_pActionNarrowCols);
-	pTB->addSeparator();
-	pTB->addAction(m_pActionEditHyperlink);
-	pTB->addAction(m_pActionCancelHyperlink);
 
 	onLoadRecentFiles();
+    updateEditActionsState();
 }
 
 MainWindow::~MainWindow()
@@ -585,7 +643,9 @@ void MainWindow::updateEditActionsState()
 	m_pActionStrikeOut->setEnabled(bHasEditor);
 	m_pActionSubscript->setEnabled(bHasEditor);
 	m_pActionSuperscript->setEnabled(bHasEditor);
-	m_pBtnTextForeColor->setEnabled(bHasEditor);
+    m_pComboTextFamily->setEnabled(bHasEditor);
+    m_pComboTextSize->setEnabled(bHasEditor);
+    m_pBtnTextForeColor->setEnabled(bHasEditor);
 	m_pBtnTextBackColor->setEnabled(bHasEditor);
 	m_pActionJustifyLeft->setEnabled(bHasEditor);
 	m_pActionJustifyCenter->setEnabled(bHasEditor);
