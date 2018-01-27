@@ -624,7 +624,7 @@ void MainWindow::updateEditActionsState()
 	QTextListFormat::Style iListStyle = bHasEditor ? m_pCurrentEdit->blockTextListStyle() : QTextListFormat::ListStyleUndefined;
 	int nSelectionBegin = -1, nSelectionEnd = -1; if(bHasEditor) m_pCurrentEdit->selection(nSelectionBegin, nSelectionEnd);
 	bool bImageSelected = (bHasEditor && m_pCurrentEdit->isImageSelected());
-	int nRowFirst, nRowCount, nColFirst, nColCount; if(bHasEditor) m_pCurrentEdit->selectedTableCells(&nRowFirst, &nRowCount, &nColFirst, &nColCount);
+    int nRowFirst = -1, nRowCount = -1, nColFirst = -1, nColCount = -1; if(bHasEditor) m_pCurrentEdit->selectedTableCells(&nRowFirst, &nRowCount, &nColFirst, &nColCount);
 
 	onCurrentCharFormatChanged(xFmtChar);
 	onCurrentBlockFormatChanged(xFmtBlock, iListStyle);
