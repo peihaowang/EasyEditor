@@ -50,6 +50,11 @@
         <file>images/btn_find.png</file>
         <file>images/btn_replace.png</file>
         <file>images/btn_para_margin.png</file>
+        <file>images/btn_newfile.svg</file>
+        <file>images/btn_bold.svg</file>
+        <file>images/btn_italic.svg</file>
+        <file>images/btn_open.svg</file>
+        <file>images/btn_save.svg</file>
         <file>images/btn_backcolor.svg</file>
         <file>images/btn_forecolor.svg</file>
         <file>images/btn_indent.svg</file>
@@ -60,5 +65,15 @@
         <file>images/btn_ordered_list.svg</file>
         <file>images/btn_outdent.svg</file>
         <file>images/btn_unordered_list.svg</file>
+        <file>images/btn_underline.svg</file>
+        <file>images/btn_ins_table.svg</file>
+        <file>images/btn_rotate_img.svg</file>
+        <file>images/btn_scale_img.svg</file>
+        <file>images/btn_redo.svg</file>
+        <file>images/btn_undo.svg</file>
+        <file>images/btn_copy.svg</file>
+        <file>images/btn_cut.svg</file>
+        <file>images/btn_paste.svg</file>
+        <file>images/btn_hyperlink_edit.svg</file>
     </qresource>
 </RCC>
