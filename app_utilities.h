@@ -30,6 +30,8 @@
 #include <QtXml/QDomNodeList>
 #include <QtXml/QDomElement>
 
+#include <QSvgRenderer>
+
 #include "type_defs.h"
 #include "string_utilities.h"
 #include "cpp_utilities.h"
@@ -655,6 +657,22 @@ public:
 	void load(const QString& sPath)
 	{
 		m_xPixmap.load(sPath);
+	}
+
+	void loadFromSvg(const QString& sPath, const QSize& szDemand)
+	{
+		bool bUseHighDpi = QApplication::testAttribute(Qt::AA_UseHighDpiPixmaps);
+		QSize szActual = bUseHighDpi ? szDemand * 2 : szDemand;
+		m_xPixmap = QPixmap(szActual); m_xPixmap.fill(Qt::transparent);
+		if(bUseHighDpi) m_xPixmap.setDevicePixelRatio(2.0);
+		QPainter xPainter(&m_xPixmap); QSvgRenderer xRenderer(sPath);
+		xRenderer.render(&xPainter, QRectF(0.0, 0.0, (double)szDemand.width(), (double)szDemand.height()));
+	}
+
+	static QPixmap pixmapFromSvg(const QString &sPath, const QSize &szDemand)
+	{
+		_CPixmapEx xPE; xPE.loadFromSvg(sPath, szDemand);
+		return xPE.pixmap();
 	}
 
 	const QPixmap& pixmap() const

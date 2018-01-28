@@ -169,10 +169,10 @@ MainWindow::MainWindow(QWidget *parent)
 //	QObject::connect(m_pComboTextSize, SIGNAL(currentIndexChanged(int)), this, SLOT(onTextSize(int)));
 	QObject::connect(m_pComboTextSize, SIGNAL(editTextChanged(QString)), this, SLOT(onTextSize(QString)));
 
-	m_pBtnTextForeColor = new QToolButtonColor(QPixmap(":/images/btn_forecolor.svg"), QColor(Qt::black), this);
+	m_pBtnTextForeColor = new QToolButtonColor(_CPixmapEx::pixmapFromSvg(":/images/btn_forecolor.svg", QSize(18, 18)), QColor(Qt::black), this);
 	m_pBtnTextForeColor->setToolButtonStyle(Qt::ToolButtonIconOnly);
 
-	m_pBtnTextBackColor = new QToolButtonColor(QPixmap(":/images/btn_backcolor.svg"), QColor(Qt::transparent), this);
+	m_pBtnTextBackColor = new QToolButtonColor(_CPixmapEx::pixmapFromSvg(":/images/btn_backcolor.svg", QSize(18, 18)), QColor(Qt::transparent), this);
 	m_pBtnTextBackColor->setToolButtonStyle(Qt::ToolButtonIconOnly);
 
 	m_pActionJustifyLeft = new QAction(this);

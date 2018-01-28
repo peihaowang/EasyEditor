@@ -73,7 +73,7 @@ protected:
 
 	QAction *			m_pActionInsOrderedList;
 	QAction *			m_pActionInsUnorderedList;
-	QActionGroup *		m_pActionGrpBlockList;
+	QActionGroup *			m_pActionGrpBlockList;
 
 	QAction *			m_pActionInsImage;
 	QAction *			m_pActionRotateImage;
