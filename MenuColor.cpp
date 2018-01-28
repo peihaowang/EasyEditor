@@ -39,16 +39,20 @@ QToolButtonColor::QToolButtonColor(const QPixmap& xIcon, const QColor& clInit, Q
 
 void QToolButtonColor::setIconForColorBtn(const QColor& clColor)
 {
-	const int nColorBarHeight = 3;
-	int nImgWidth = m_xIcon.width(), nImgHeight = m_xIcon.height();
+	const int nRibbonHeight = 3;
+	int nImgWidth = m_xIcon.width() / m_xIcon.devicePixelRatio(), nImgHeight = m_xIcon.height() / m_xIcon.devicePixelRatio();
 
-	QPixmap xPixmap = m_xIcon;
+	QPixmap xPixmap(m_xIcon.size()); xPixmap.fill(Qt::transparent);
+	if(QApplication::testAttribute(Qt::AA_UseHighDpiPixmaps)) xPixmap.setDevicePixelRatio(2.0);
 	QColor clBorder = clColor; if(clBorder.alpha() == 0) clBorder = QColor(Qt::black);
-	QRect rc(0, nImgHeight - nColorBarHeight, nImgWidth - 1, nColorBarHeight - 1);
+	QRect rcIconTarget(0, 0, nImgWidth - 1, nImgHeight - nRibbonHeight);
+	QRect rcIconSource(0, 0, m_xIcon.width(), m_xIcon.height() - nRibbonHeight * xPixmap.devicePixelRatio());
+	QRect rcRibbon(0, nImgHeight - nRibbonHeight, nImgWidth - 1, nRibbonHeight - 1);
 	QPainter xPainter(&xPixmap);
+	xPainter.drawPixmap(rcIconTarget, m_xIcon, rcIconSource);
 	xPainter.setPen(QPen(clBorder, 1.0, Qt::SolidLine));
 	xPainter.setBrush(QBrush(clColor));
-	xPainter.drawRect(rc);
+	xPainter.drawRect(rcRibbon);
 
 	QToolButton::setIcon(QIcon(xPixmap));
 }
