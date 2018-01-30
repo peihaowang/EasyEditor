@@ -473,8 +473,8 @@ public:
 
 public slots:
 
-	void undoEx(){m_pTextDocument->undoEx();}
-	void redoEx(){m_pTextDocument->redoEx();}
+	void _undo(){m_pTextDocument->_undo();}
+	void _redo(){m_pTextDocument->_redo();}
 
 	void toggleFontBold(){setFontBold(!fontBold());}
 	void toggleFontItalic(){QTextEdit::setFontItalic(!QTextEdit::fontItalic());}

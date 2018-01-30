@@ -94,7 +94,7 @@ void _CBlockBlink::onFadeIn()
 
 void _CTextImage::_unserialize(const QDomElement& xDomEle)
 {
-	if(xDomEle.tagName() == "img"){
+	if(xDomEle.tagName() == "imgres"){
 		if(xDomEle.hasAttribute("scaleX")) m_nScaleX = xDomEle.attribute("scaleX").toDouble();
 		if(xDomEle.hasAttribute("scaleY")) m_nScaleY = xDomEle.attribute("scaleY").toDouble();
 		if(xDomEle.hasAttribute("rotation")) m_nRotation = xDomEle.attribute("rotation").toInt();
@@ -107,13 +107,14 @@ void _CTextImage::_unserialize(const QDomElement& xDomEle)
 
 void _CTextImage::_serialize(QDomElement& xDomEle) const
 {
-	xDomEle.setTagName("img");
-	xDomEle.setAttribute("scaleX", m_nScaleX);
-	xDomEle.setAttribute("scaleY", m_nScaleY);
-	xDomEle.setAttribute("rotation", m_nRotation);
-	xDomEle.setAttribute("url", m_sUrl);
-	xDomEle.setAttribute("source", m_sSource);
-	xDomEle.setAttribute("format", m_sFormat);
+	if(xDomEle.tagName() == "imgres"){
+		xDomEle.setAttribute("scaleX", m_nScaleX);
+		xDomEle.setAttribute("scaleY", m_nScaleY);
+		xDomEle.setAttribute("rotation", m_nRotation);
+		xDomEle.setAttribute("url", m_sUrl);
+		xDomEle.setAttribute("source", m_sSource);
+		xDomEle.setAttribute("format", m_sFormat);
+	}
 }
 
 QPixmap _CTextImage::sourcePixmap() const
@@ -198,6 +199,29 @@ void _CUndoCmdInsertImage::redo(){
 
 ///////////////////////////////////////////////////////////
 
+_CUndoCmdRotateImage::_CUndoCmdRotateImage(_CMyDocument* pDocument, const QString& sUrl, int nVal, QUndoCommand* parent)
+	: QUndoCommand(parent)
+	, m_pTextDocument(pDocument)
+	, m_sUrl(sUrl)
+	, m_nVal(nVal)
+{
+	return;
+}
+
+void _CUndoCmdRotateImage::swap()
+{
+	QMap<QUrl, _CTextImage>::iterator it = m_pTextDocument->m_mImageResources.find(QUrl(m_sUrl));
+	if(it != m_pTextDocument->m_mImageResources.end()){
+		int nOldVal = it.value().rotation();
+		it.value().rotate(m_nVal);
+		m_nVal = nOldVal;
+
+		m_pTextDocument->m_mImageCache.remove(QUrl(m_sUrl));
+	}
+}
+
+///////////////////////////////////////////////////////////
+
 _CMyDocument::_CMyDocument(QObject* parent)
 	: QTextDocument(parent)
 {
@@ -209,29 +233,67 @@ void _CMyDocument::loadDocument(const QString& sText, QString* sErrMsg, int* nEr
 {
 	QDomDocument xDomDoc; xDomDoc.setContent(sText, sErrMsg, nErrLine, nErrCol);
 
+//	QRegularExpression xRE("^(\\s*)\\n(\\s*)\\n", QRegularExpression::MultilineOption);
+//	QRegularExpressionMatch xMatch; sText.indexOf(xRE, 0, &xMatch);
+
+//	if(xMatch.isValid()){
+//		QString sResources = sText.mid(0, xMatch.capturedStart() + 1);
+//		QString sHtml = sText.mid(xMatch.capturedEnd() + 1);
+
+//		//2018.1.29 Identify resources
+//		{
+//			QDomDocument xDomDocRes; xDomDocRes.setContent(sResources);
+//			if(!xDomDocRes.isNull()){
+//				QDomNodeList vImgs = xDomDocRes.documentElement().elementsByTagName("imgres");
+//				for(int i = 0; i < vImgs.count(); i++){
+//					QDomNode xNode = vImgs.item(i);
+//					if(xNode.isElement()){
+//						_CTextImage xTextImg(xNode.toElement());
+//						m_mImageResources[QUrl(xTextImg.url())] = xTextImg;
+//					}
+//				}
+//			}
+//		}
+
+//		//2018.1.23 Set html content
+//		QTextDocument::setHtml(sHtml);
+//		QTextDocument::setModified(false);
+//	}
+
+
 	//2018.1.23 Identify resources
 	{
-		QDomElement xEleResources = xDomDoc.firstChildElement("__resources__");
-		if(!xEleResources.isNull()){
-			QDomNodeList vImgs = xEleResources.elementsByTagName("imgres");
-			for(int i = 0; i < vImgs.count(); i++){
-				QDomNode xNode = vImgs.item(i);
-				if(xNode.isElement()){
-					_CTextImage xTextImg(xNode.toElement());
-					m_mImageResources[QUrl(xTextImg.url())] = xTextImg;
+		QDomElement xEleHead = xDomDoc.documentElement().firstChildElement("head");
+		if(!xEleHead.isNull()){
+			QDomElement xEleResources = xEleHead.firstChildElement("__resources__");
+			if(!xEleResources.isNull()){
+				QDomNodeList vImgs = xEleResources.elementsByTagName("imgres");
+				for(int i = 0; i < vImgs.count(); i++){
+					QDomNode xNode = vImgs.item(i);
+					if(xNode.isElement()){
+						_CTextImage xTextImg(xNode.toElement());
+						m_mImageResources[QUrl(xTextImg.url())] = xTextImg;
+					}
 				}
 			}
+//			xEleHead.removeChild(xEleResources);
 		}
-		xDomDoc.removeChild(xEleResources);
 	}
 
 	//2018.1.23 Set html content
-	QTextDocument::setHtml(xDomDoc.toString());
+//	QTextDocument::setHtml(xDomDoc.toString());
+	QTextDocument::setHtml(sText);
+	QTextDocument::setModified(false);
 }
 
 QString _CMyDocument::toString(QString* sErrMsg, int* nErrLine, int* nErrCol) const
 {
 	QDomDocument xDomDoc; xDomDoc.setContent(QTextDocument::toHtml(), sErrMsg, nErrLine, nErrCol);
+	QDomElement xEleHead = xDomDoc.documentElement().firstChildElement("head");
+	if(xEleHead.isNull()){
+		xEleHead = xDomDoc.createElement("head");
+		xDomDoc.documentElement().appendChild(xEleHead);
+	}
 	QDomElement xEleResources = xDomDoc.createElement("__resources__");
 	if(!xEleResources.isNull()){
 		QMap<QUrl, _CTextImage>::const_iterator it;
@@ -240,9 +302,9 @@ QString _CMyDocument::toString(QString* sErrMsg, int* nErrLine, int* nErrCol) co
 			it.value().constructDomElement(xEleImg);
 			xEleResources.appendChild(xEleImg);
 		}
+		xEleHead.appendChild(xEleResources);
 	}
-	xDomDoc.appendChild(xEleResources);
-	return xDomDoc.toString();
+	return xDomDoc.toString(-1);
 }
 
 QPixmap _CMyDocument::sourceImage(const _CTextImage& xTextImg, bool bOrigin) const
@@ -280,17 +342,38 @@ void _CMyDocument::endMacro()
 	m_pUndoStack->endMacro();
 }
 
-void _CMyDocument::undoEx()
+void _CMyDocument::_undo()
 {
 	if(m_pUndoStack->canUndo()){
 		m_pUndoStack->undo();
 	}
 }
 
-void _CMyDocument::redoEx()
+void _CMyDocument::_redo()
 {
 	if(m_pUndoStack->canRedo()){
 		m_pUndoStack->redo();
+	}
+}
+
+void _CMyDocument::cleanUnlinkedImages()
+{
+	QDomDocument xDomDoc; xDomDoc.setContent(QTextDocument::toHtml());
+	QDomElement xEleBody = xDomDoc.documentElement().firstChildElement("body");
+	if(!xEleBody.isNull()){
+		_CPredCollectImgUrls xPred;
+		_CXmlUtils::travelDomChildElements(xEleBody, xPred);
+
+		QList<QUrl> vToRemove;
+		QMap<QUrl, _CTextImage>::iterator it;
+		for(it = m_mImageResources.begin(); it != m_mImageResources.end(); it++){
+			if(xPred.m_vImgUrls.indexOf(it.key()) < 0){
+				vToRemove << it.key();
+			}
+		}
+		Q_FOREACH(QUrl xUrl, vToRemove){
+			m_mImageResources.remove(xUrl);
+		}
 	}
 }
 

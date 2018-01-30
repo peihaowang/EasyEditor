@@ -107,7 +107,8 @@ void _CMyRichEdit::open(const QString& sFn)
 {
 	if(QFileInfo(sFn).exists()){
 		QString sHtml = _CTextFile::load(sFn, "html");
-		QTextEdit::setHtml(sHtml);
+		m_pTextDocument->loadDocument(sHtml);
+//		QTextEdit::setHtml(sHtml);
 		m_sFilePath = sFn;
 	}
 }
@@ -122,7 +123,9 @@ void _CMyRichEdit::save()
 
 void _CMyRichEdit::saveAs(const QString& sFn) const
 {
-	QString sHtml = QTextEdit::toHtml();
+//	QString sHtml = QTextEdit::toHtml();
+	m_pTextDocument->cleanUnlinkedImages();
+	QString sHtml = m_pTextDocument->toString();
 	_CTextFile::saveUtf8(sFn, sHtml, true);
 }
 
@@ -620,13 +623,17 @@ bool _CMyRichEdit::currentImage(_CTextImage& xTextImg) const
 
 		if(xTC.anchor() > xTC.position() && xTCAnchor.charFormat().isImageFormat()){
 			xFmt = xTCAnchor.charFormat().toImageFormat();
-			bSucc = true;
 		}else if(xTC.anchor() < xTC.position() && xTCPosition.charFormat().isImageFormat()){
 			xFmt = xTCPosition.charFormat().toImageFormat();
+		}
+	}
+	if(!xFmt.isEmpty()){
+		QMap<QUrl, _CTextImage>	::const_iterator it = m_pTextDocument->m_mImageResources.find(QUrl(xFmt.name()));
+		if(it != m_pTextDocument->m_mImageResources.end()){
+			xTextImg = it.value();
 			bSucc = true;
 		}
 	}
-	xTextImg = _CTextImage(xFmt.name());
 	return bSucc;
 }
 
@@ -636,9 +643,9 @@ void _CMyRichEdit::insertImage(const QPixmap& xImg)
 	_CUndoCmdInsertImage* pUndoCmd = new _CUndoCmdInsertImage(m_pTextDocument, xTextImg);
 	m_pTextDocument->beginMacro("Insert image");
 	m_pTextDocument->pushToUndoStack(pUndoCmd);
-	QTextEdit::textCursor().insertImage(xTextImg.url());
+//	QTextEdit::textCursor().insertImage(xTextImg.url());
+	QTextEdit::textCursor().insertHtml(xTextImg.imageTagStr());
 	m_pTextDocument->endMacro();
-//	QTextEdit::textCursor().insertHtml(xTextImg.imageTagStr());
 }
 
 void _CMyRichEdit::insertImage(const QString& sUrl)
@@ -661,7 +668,10 @@ void _CMyRichEdit::rotateImage(int nRotation)
 {
 	_CTextImage xTextImg;
 	if(currentImage(xTextImg)){
-		xTextImg.rotate(nRotation);
+		_CUndoCmdRotateImage* pUndoCmd = new _CUndoCmdRotateImage(m_pTextDocument, xTextImg.url(), nRotation);
+		m_pTextDocument->pushToUndoStack(pUndoCmd);
+		QTextEdit::update();
+//		xTextImg.rotate(nRotation);
 //		QTextImageFormat xImgFmt; xImgFmt.setName((QString)xTextImg);
 //		QTextEdit::textCursor().mergeCharFormat(xImgFmt);
 	}

@@ -526,8 +526,8 @@ void MainWindow::makeUniqueConnection(const QObject* prevSender, const QObject* 
 void MainWindow::makeConnections(_CMyRichEdit* pPrevEdit, _CMyRichEdit* pNewEdit)
 {
 	if(pPrevEdit){
-		makeUniqueConnection(m_pActionUndo, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(undoEx()));
-		makeUniqueConnection(m_pActionRedo, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(redoEx()));
+		makeUniqueConnection(m_pActionUndo, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(_undo()));
+		makeUniqueConnection(m_pActionRedo, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(_redo()));
 		makeUniqueConnection(m_pActionCut, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(cut()));
 		makeUniqueConnection(m_pActionCopy, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(copy()));
 		makeUniqueConnection(m_pActionPaste, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(paste()));

@@ -125,7 +125,7 @@ public:
 	QPixmap sourcePixmap() const;
 	void setSource(const QPixmap& xPixmap, const QString& sFormat = "");
 
-//	QString imageTagStr() const {return QString("<img src=\"%1\" />").arg(_serialize());}
+	QString imageTagStr() const {return QString("<img src=\"%1\" />").arg(m_sUrl);}
 
 	_CTextImage& operator=(const _CTextImage& xOther)
 	{
@@ -141,7 +141,6 @@ public:
 	}
 	void operator=(const QDomElement& xDomEle){_unserialize(xDomEle);}
 	void constructDomElement(QDomElement& xDomEle) const {_serialize(xDomEle);}
-//	operator QDomElement() const {return _serialize();}
 
 };
 
@@ -179,6 +178,26 @@ public:
 
 };
 
+class _CUndoCmdRotateImage : public QUndoCommand{
+
+protected:
+
+	_CMyDocument *			m_pTextDocument;
+
+	QString				m_sUrl;
+	int				m_nVal;
+
+public:
+
+	_CUndoCmdRotateImage(_CMyDocument* pDocument, const QString& sUrl, int nVal, QUndoCommand* parent = 0);
+
+	void swap();
+
+	virtual void undo(){swap();}
+	virtual void redo(){swap();}
+
+};
+
 class _CMyDocument : public QTextDocument{
 
 	Q_OBJECT
@@ -192,10 +211,26 @@ protected:
 
 	QUndoStack *			m_pUndoStack;
 
+protected:
+
+	class _CPredCollectImgUrls
+	{
+	public:
+		QList<QUrl>		m_vImgUrls;
+	public:
+		void operator()(QDomElement& xDomEle){
+			if(xDomEle.tagName().toLower() == "img"){
+				QString sUrl = xDomEle.attribute("src", "");
+				if(!sUrl.isEmpty()) m_vImgUrls << QUrl(sUrl);
+			}
+		}
+	};
+
 public:
 
 	friend class _CMyRichEdit;
 	friend class _CUndoCmdInsertImage;
+	friend class _CUndoCmdRotateImage;
 
 	_CMyDocument(QObject* parent);
 
@@ -212,8 +247,10 @@ public:
 	void beginMacro(const QString& sText);
 	void endMacro();
 
-	void undoEx();
-	void redoEx();
+	void _undo();
+	void _redo();
+
+	void cleanUnlinkedImages();
 
 protected slots:
 

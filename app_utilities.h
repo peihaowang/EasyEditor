@@ -1015,4 +1015,25 @@ public:
 
 ///////////////////////////////////////////////////////////
 
+class _CXmlUtils{
+
+public:
+
+	template<typename _CPred> static void travelDomChildElements(QDomElement& xDomEle, _CPred& xPred)
+	{
+		QDomNodeList vNodeList = xDomEle.childNodes();
+		for(int i = 0; i < vNodeList.size(); i++){
+			QDomNode xDomNode = vNodeList.item(i);
+			if(xDomNode.isElement()){
+				QDomElement xDomChildEle = xDomNode.toElement();
+				xPred(xDomChildEle);
+				travelDomChildElements(xDomChildEle, xPred);
+			}
+		}
+	}
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
 #endif // MISC_UTILITIES_H
