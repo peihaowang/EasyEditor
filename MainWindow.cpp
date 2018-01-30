@@ -1007,7 +1007,7 @@ void MainWindow::onScaleImage()
 		if(dlg.exec()){
 			int w = dlg.m_nWidth, h = dlg.m_nHeight;
 			if(w >= 0 && h >= 0){
-				m_pCurrentEdit->scaleImage(w, h);
+				m_pCurrentEdit->resizeImageTo(w, h);
 			}
 		}
 	}

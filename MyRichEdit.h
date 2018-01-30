@@ -34,9 +34,6 @@ protected:
 
 	_CHighlighterOccurrence *		m_pHighlighterOccurrence;
 
-	friend class _CBlockBlink;
-	_CBlockBlink *				m_pBookmarkBlinker;
-
 protected:
 
 	virtual void mouseMoveEvent(QMouseEvent* e);
@@ -72,7 +69,7 @@ protected:
 
 	QList<QTextBlock> selectedBlocks() const;
 
-	bool currentImage(_CTextImage& xTextImg) const;
+	_CTextImage* currentImage() const;
 
 	//2017.2.10 for const function
 	template<typename _CPred> void traverseSelectedBlocks(_CPred& xPred) const
@@ -129,7 +126,6 @@ protected:
 	void setLineSpacingProportional(qreal nProportion);
 
 	void removeBlockFromTextList(const QTextBlock& xBlock);
-//	void splitTextList(const QTextBlock& xBlock);
 
 	class _CPredGetTextListStyle
 	{
@@ -424,21 +420,17 @@ public:
 	bool blockUnorderedList() const;
 	void setBlockUnorderedList(bool bList);
 
-	bool isImageSelected() const
-	{
-		_CTextImage xTextImage;
-		return currentImage(xTextImage);
-	}
+	bool isImageSelected() const {return currentImage();}
 
 	void insertImage(const QPixmap& xImg);
-	void insertImage(const QString& sUrl);
 
 	int imageRotation() const;
 	void rotateImage(int nRotation);
 
 	int imageWidth() const;
 	int imageHeight() const;
-	void scaleImage(qreal x, int y);
+	void scaleImage(qreal x, qreal y);
+	void resizeImageTo(int width, int height);
 
 	bool isTableFocused() const {return QTextEdit::textCursor().currentTable();}
 	void selectedTableCells(int* rowFirst, int* rowCount, int* colFirst, int* colCount) const;
@@ -467,9 +459,6 @@ public:
 	void insertUrl(const QString& sTitle, const QString& sUrl);
 	void setUrlForSelectedText(const QString& sUrl);
 	void clearUrlForSelectedText();
-
-	void bookmarkBlocks(const QString& sName);
-	void jumpToBookmark(const QString& sName);
 
 public slots:
 

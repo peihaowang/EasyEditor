@@ -46,40 +46,16 @@ protected:
 
 };
 
-class _CBlockBlink : public QObject
-{
-
-	Q_OBJECT
-
-protected:
-
-	_CMyRichEdit *		m_pEdit;
-
-	QTimer *		m_pTimer;
-
-	QColor			m_clBackground;
-
-public:
-
-	_CBlockBlink(_CMyRichEdit* edit = 0);
-
-	void blink(const QList<QTextBlock>& vBlocks);
-
-protected slots:
-
-	void onFadeIn();
-
-};
-
 class _CTextImage{
 
 protected:
+
+	QString			m_sUrl;
 
 	qreal			m_nScaleX;
 	qreal			m_nScaleY;
 	int			m_nRotation;
 
-	QString			m_sUrl;
 	QString			m_sSource;
 	QString			m_sFormat;
 
@@ -87,11 +63,12 @@ protected:
 
 	void _clear()
 	{
+		m_sUrl = "";
+
 		m_nScaleX = 1.0;
 		m_nScaleY = 1.0;
 		m_nRotation = 0;
 
-		m_sUrl = "";
 		m_sSource = "";
 		m_sFormat = "";
 	}
@@ -103,7 +80,7 @@ public:
 
 	_CTextImage(){_clear();}
 
-	_CTextImage(const QDomElement& xDomEle){_unserialize(xDomEle);}
+	_CTextImage(const QDomElement& xDomEle){_clear(); _unserialize(xDomEle);}
 	_CTextImage(const QPixmap& xImage, const QString& sFormat = ""){_clear(); setSource(xImage, sFormat);}
 	_CTextImage(const _CTextImage& xTextImage){(*this) = xTextImage;}
 
@@ -123,6 +100,7 @@ public:
 
 	QString source() const {return m_sSource;}
 	QPixmap sourcePixmap() const;
+	QPixmap transformedPixmap(Qt::TransformationMode iTransformMode = Qt::FastTransformation) const;
 	void setSource(const QPixmap& xPixmap, const QString& sFormat = "");
 
 	QString imageTagStr() const {return QString("<img src=\"%1\" />").arg(m_sUrl);}
@@ -141,6 +119,7 @@ public:
 	}
 	void operator=(const QDomElement& xDomEle){_unserialize(xDomEle);}
 	void constructDomElement(QDomElement& xDomEle) const {_serialize(xDomEle);}
+	QTextImageFormat constructTextImageFmt() const;
 
 };
 
@@ -198,13 +177,32 @@ public:
 
 };
 
+class _CUndoCmdScaleImage : public QUndoCommand{
+
+protected:
+
+	_CMyDocument *			m_pTextDocument;
+
+	QString				m_sUrl;
+	double				m_nValX;
+	double				m_nValY;
+
+public:
+
+	_CUndoCmdScaleImage(_CMyDocument* pDocument, const QString& sUrl, double nValX, double nValY, QUndoCommand* parent = 0);
+
+	void swap();
+
+	virtual void undo(){swap();}
+	virtual void redo(){swap();}
+
+};
+
 class _CMyDocument : public QTextDocument{
 
 	Q_OBJECT
 
 protected:
-
-	QUrl				m_xBaseUrl;
 
 	QMap<QUrl, _CTextImage>		m_mImageResources;
 	QMap<QUrl, QPixmap>		m_mImageCache;
@@ -229,18 +227,21 @@ protected:
 public:
 
 	friend class _CMyRichEdit;
-	friend class _CUndoCmdInsertImage;
-	friend class _CUndoCmdRotateImage;
 
 	_CMyDocument(QObject* parent);
 
 	void loadDocument(const QString& sText, QString* sErrMsg = NULL, int* nErrLine = NULL, int* nErrCol = NULL);
 	QString toString(QString* sErrMsg = NULL, int* nErrLine = NULL, int* nErrCol = NULL) const;
 
-	QUrl baseUrl() const {return m_xBaseUrl;}
-	void setBaseUrl(const QUrl& xUrl){m_xBaseUrl = xUrl;}
+	bool existsImage(const QUrl& xUrlImg) const;
+	//2018.1.30 It's not recommend to keep the returned pointer for a long period
+	_CTextImage* imageOf(const QUrl& xUrlImg);
 
-	QPixmap sourceImage(const _CTextImage& xTextImg, bool bOrigin) const;
+	void addImageResource(const QUrl& xUrlImg, const _CTextImage& xTextImage){m_mImageResources[xUrlImg] = xTextImage;}
+	void removeImageResource(const QUrl& xUrlImg){m_mImageResources.remove(xUrlImg);}
+	void cleanUnlinkedImages();
+
+	void clearImageCache(const QUrl& xUrlImg = QUrl());
 
 	void pushToUndoStack(QUndoCommand* pUndoCmd);
 
@@ -249,8 +250,6 @@ public:
 
 	void _undo();
 	void _redo();
-
-	void cleanUnlinkedImages();
 
 protected slots:
 

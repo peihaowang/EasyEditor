@@ -174,6 +174,8 @@ void _CAppSettings::_ddx(_CKeyValEntries& xKV, bool bGet)
 {
 	iniDdx(xKV, bGet, "MRU.Files", m_vMruFiles);
 
+	iniDdx(xKV, bGet, "Dlg.ScaleImage.KeepRatio", m_bDlgScale_KeepAspectRatio, true);
+
 	iniDdx(xKV, bGet, "Find.Options.Case", m_bFindTextWithCase, false);
 	iniDdx(xKV, bGet, "Find.Options.WholeWord", m_bFindTextWholeWord, false);
 	iniDdx(xKV, bGet, "Find.Options.RegExp", m_bFindTextRegExp, false);

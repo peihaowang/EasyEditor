@@ -15,7 +15,6 @@ _CMyRichEdit::_CMyRichEdit(QWidget* parent)
 	QTextEdit::setDocument(m_pTextDocument);
 
 	m_pHighlighterOccurrence = new _CHighlighterOccurrence(m_pTextDocument);
-	m_pBookmarkBlinker = new _CBlockBlink(this);
 
 	{
 		QPalette xPal = QTextEdit::palette();
@@ -96,7 +95,7 @@ void _CMyRichEdit::onDetectCellsSelectionChanges()
 
 void _CMyRichEdit::onDetectImageSelectionChanged()
 {
-	_CTextImage xTextImage; bool bImageSelected = currentImage(xTextImage);
+	_CTextImage xTextImage; bool bImageSelected = currentImage();
 	if(m_bImageSelected != bImageSelected){
 		m_bImageSelected = bImageSelected;
 		emit imageSelectionChanged(m_bImageSelected);
@@ -411,85 +410,10 @@ void _CMyRichEdit::removeBlockFromTextList(const QTextBlock& xBlock)
 	}
 }
 
-#if 0
-
-void _CMyRichEdit::splitTextList(const QTextBlock& xBlock)
-{
-	QTextList* pTextList = xBlock.textList();
-	if(pTextList){
-		//2016.11.5 Need not to add first block to the list, because createList will add the block to the new text list
-		//2016.11.5 Never use text list pointer in a loop(especially a loop which removes block items), for the destructor will be auto called when last block item removed
-		QList<QTextBlock> vBlocks;
-		for(int i = (pTextList->itemNumber(xBlock) + 1); i < pTextList->count(); i++){
-			QTextBlock xBlockItem = pTextList->item(i);
-			vBlocks << xBlockItem;
-		}
-
-		QTextCursor xTC = textCursorOfBlock(xBlock);
-		QTextList* pTextListNew = xTC.createList(pTextList->format());
-		Q_FOREACH(QTextBlock xBlockItem, vBlocks){
-			removeBlockFromTextList(xBlockItem);
-			pTextListNew->add(xBlockItem);
-		}
-	}
-}
-
-#endif
-
 void _CMyRichEdit::setBlockTextList(QTextListFormat::Style iStyle)
 {
 	beginEdit();
-
-#if 0
-
-	QList<QTextBlock> vBlocks = selectedBlocks();
-	if(!vBlocks.isEmpty()){
-		QTextBlock xBlockPrev = vBlocks.first().previous(), xBlockNext = vBlocks.last().next();
-		QTextList* pListPrev = xBlockPrev.textList(); QTextList* pListNext = xBlockNext.textList();
-		if(pListPrev && pListNext && pListPrev->format().style() == iStyle && pListNext->format().style() == iStyle){
-			//2016.10.30 Note: When the last block removed from the text list, the list will be deleted
-			int n = pListNext->count();
-			for(int i = 0; i < n; i++){
-				QTextBlock xBlockItem = pListNext->item(0);
-				removeBlockFromTextList(xBlockItem);
-				pListPrev->add(xBlockItem);
-			}
-			Q_FOREACH(QTextBlock xBlock, vBlocks){
-				removeBlockFromTextList(xBlock);
-				pListPrev->add(xBlock);
-			}
-		}else if(pListPrev && pListPrev->format().style() == iStyle){
-			Q_FOREACH(QTextBlock xBlock, vBlocks){
-				removeBlockFromTextList(xBlock);
-				pListPrev->add(xBlock);
-			}
-		}else if(pListNext && pListNext->format().style() == iStyle){
-			Q_FOREACH(QTextBlock xBlock, vBlocks){
-				removeBlockFromTextList(xBlock);
-				pListNext->add(xBlock);
-			}
-		}else{
-			QTextCursor xTC = textCursorOfBlock(vBlocks.first());
-			QTextListFormat xFmt; xFmt.setIndent(0); xFmt.setStyle(iStyle);
-			QTextList* pTextList = xTC.createList(xFmt);
-			Q_FOREACH(QTextBlock xBlock, vBlocks){
-				pTextList->add(xBlock);
-				//2016.10.30 The first block has been added into the list, removing it will cause text list's destruction
-				if(pTextList->itemNumber(xBlock) < 0){
-					removeBlockFromTextList(xBlock);
-					pTextList->add(xBlock);
-				}
-			}
-			splitTextList(vBlocks.last().next());
-		}
-	}
-
-#else
-
 	QTextEdit::textCursor().createList(iStyle);
-
-#endif
-
 	endEdit();
 }
 
@@ -501,7 +425,6 @@ void _CMyRichEdit::cancelBlockTextList()
 	Q_FOREACH(QTextBlock xBlock, vBlocks){
 		removeBlockFromTextList(xBlock);
 	}
-//	splitTextList(vBlocks.last().next());
 
 	endEdit();
 }
@@ -612,11 +535,10 @@ void _CMyRichEdit::promoteToParentList()
 	}
 }
 
-bool _CMyRichEdit::currentImage(_CTextImage& xTextImg) const
+_CTextImage* _CMyRichEdit::currentImage() const
 {
-	bool bSucc = false;
-	QTextImageFormat xFmt;
-	QTextCursor xTC = QTextEdit::textCursor();
+	_CTextImage* pTextImage = NULL;
+	QTextImageFormat xFmt; QTextCursor xTC = QTextEdit::textCursor();
 	if(hasSelection() && qAbs(xTC.anchor() - xTC.position()) == 1){
 		QTextCursor xTCAnchor(m_pTextDocument); xTCAnchor.setPosition(QTextEdit::textCursor().anchor(), QTextCursor::MoveAnchor);
 		QTextCursor xTCPosition(m_pTextDocument); xTCPosition.setPosition(QTextEdit::textCursor().position(), QTextCursor::MoveAnchor);
@@ -628,37 +550,29 @@ bool _CMyRichEdit::currentImage(_CTextImage& xTextImg) const
 		}
 	}
 	if(!xFmt.isEmpty()){
-		QMap<QUrl, _CTextImage>	::const_iterator it = m_pTextDocument->m_mImageResources.find(QUrl(xFmt.name()));
-		if(it != m_pTextDocument->m_mImageResources.end()){
-			xTextImg = it.value();
-			bSucc = true;
-		}
+		pTextImage = m_pTextDocument->imageOf(QUrl(xFmt.name()));
 	}
-	return bSucc;
+	return pTextImage;
 }
 
 void _CMyRichEdit::insertImage(const QPixmap& xImg)
 {
 	_CTextImage xTextImg(xImg);
-	_CUndoCmdInsertImage* pUndoCmd = new _CUndoCmdInsertImage(m_pTextDocument, xTextImg);
-	m_pTextDocument->beginMacro("Insert image");
-	m_pTextDocument->pushToUndoStack(pUndoCmd);
-//	QTextEdit::textCursor().insertImage(xTextImg.url());
-	QTextEdit::textCursor().insertHtml(xTextImg.imageTagStr());
-	m_pTextDocument->endMacro();
-}
+	m_pTextDocument->beginMacro("Insert Image");
 
-void _CMyRichEdit::insertImage(const QString& sUrl)
-{
-//	_CTextImage xTextImg; xTextImg.setSource(sUrl, _CTextImage::_TYPE_URL);
+	_CUndoCmdInsertImage* pUndoCmd = new _CUndoCmdInsertImage(m_pTextDocument, xTextImg);
+	m_pTextDocument->pushToUndoStack(pUndoCmd);
+	QTextEdit::textCursor().insertImage(xTextImg.constructTextImageFmt());
 //	QTextEdit::textCursor().insertHtml(xTextImg.imageTagStr());
+
+	m_pTextDocument->endMacro();
 }
 
 int _CMyRichEdit::imageRotation() const
 {
-	int rotation = -1; _CTextImage xTextImg;
-	if(currentImage(xTextImg)){
-		rotation = xTextImg.rotation();
+	int rotation = -1; _CTextImage* pTextImg = currentImage();
+	if(pTextImg){
+		rotation = pTextImg->rotation();
 	}
 	if(rotation < 0) rotation = 0;
 	return rotation;
@@ -666,42 +580,59 @@ int _CMyRichEdit::imageRotation() const
 
 void _CMyRichEdit::rotateImage(int nRotation)
 {
-	_CTextImage xTextImg;
-	if(currentImage(xTextImg)){
-		_CUndoCmdRotateImage* pUndoCmd = new _CUndoCmdRotateImage(m_pTextDocument, xTextImg.url(), nRotation);
+	_CTextImage* pTextImg = currentImage();
+	if(pTextImg){
+		m_pTextDocument->beginMacro("Rotate Image");
+
+		_CUndoCmdRotateImage* pUndoCmd = new _CUndoCmdRotateImage(m_pTextDocument, pTextImg->url(), nRotation);
 		m_pTextDocument->pushToUndoStack(pUndoCmd);
-		QTextEdit::update();
-//		xTextImg.rotate(nRotation);
-//		QTextImageFormat xImgFmt; xImgFmt.setName((QString)xTextImg);
-//		QTextEdit::textCursor().mergeCharFormat(xImgFmt);
+		QTextEdit::textCursor().mergeCharFormat(pTextImg->constructTextImageFmt());
+
+		m_pTextDocument->endMacro();
 	}
 }
 
 int _CMyRichEdit::imageWidth() const
 {
-	int w = -1; _CTextImage xTextImg;
-	if(currentImage(xTextImg)){
-		w = m_pTextDocument->sourceImage(xTextImg, true).width();
+	int w = -1; _CTextImage* pTextImg = currentImage();
+	if(pTextImg){
+		w = (int)((double)pTextImg->sourcePixmap().width() * pTextImg->scaleValX());
+//		w = m_pTextDocument->sourceImage(xTextImg, true).width();
 	}
 	return w;
 }
 
 int _CMyRichEdit::imageHeight() const
 {
-	int h = -1; _CTextImage xTextImg;
-	if(currentImage(xTextImg)){
-		h = m_pTextDocument->sourceImage(xTextImg, true).height();
+	int h = -1; _CTextImage* pTextImg = currentImage();
+	if(pTextImg){
+		h = (int)((double)pTextImg->sourcePixmap().height() * pTextImg->scaleValY());
+//		h = m_pTextDocument->sourceImage(xTextImg, true).height();
 	}
 	return h;
 }
 
-void _CMyRichEdit::scaleImage(qreal x, int y)
+void _CMyRichEdit::scaleImage(qreal x, qreal y)
 {
-	_CTextImage xTextImg;
-	if(currentImage(xTextImg)){
-		xTextImg.scale(x, y);
-//		QTextImageFormat xImgFmt; xImgFmt.setName((QString)xTextImg);
-//		QTextEdit::textCursor().mergeCharFormat(xImgFmt);
+	_CTextImage* pTextImg = currentImage();
+	if(pTextImg){
+		m_pTextDocument->beginMacro("Scale Image");
+
+		_CUndoCmdScaleImage* pUndoCmd = new _CUndoCmdScaleImage(m_pTextDocument, pTextImg->url(), x, y);
+		m_pTextDocument->pushToUndoStack(pUndoCmd);
+		QTextEdit::textCursor().mergeCharFormat(pTextImg->constructTextImageFmt());
+
+		m_pTextDocument->endMacro();
+	}
+}
+
+void _CMyRichEdit::resizeImageTo(int width, int height)
+{
+	_CTextImage* pTextImg = currentImage();
+	if(pTextImg){
+		QPixmap xSrcPixmap = pTextImg->sourcePixmap();
+		double x = (double)width / (double)xSrcPixmap.width(), y = (double)height / (double)xSrcPixmap.height();
+		scaleImage(x, y);
 	}
 }
 
@@ -1100,37 +1031,6 @@ void _CMyRichEdit::clearUrlForSelectedText()
 		xFmt.setAnchor(false);
 		xFmt.setAnchorHref("");
 		QTextEdit::mergeCurrentCharFormat(xFmt);
-	}
-}
-
-void _CMyRichEdit::bookmarkBlocks(const QString& sName)
-{
-	QList<QTextBlock> vBlocks = selectedBlocks();
-	Q_FOREACH(QTextBlock xBlock, vBlocks){
-		QTextCursor xTC = textCursorOfBlock(xBlock, false);
-		QTextCharFormat xFmt; xFmt.setAnchorName(sName);
-		xTC.mergeBlockCharFormat(xFmt);
-	}
-}
-
-void _CMyRichEdit::jumpToBookmark(const QString& sName)
-{
-	QList<QTextBlock> vBlocks;
-	QTextBlock xBlock = m_pTextDocument->firstBlock();
-	while(xBlock.isValid()){
-		if(xBlock.charFormat().anchorNames().indexOf(sName) >= 0){
-			vBlocks << xBlock;
-		}
-		xBlock = xBlock.next();
-	}
-
-	if(!vBlocks.isEmpty()){
-		QTextCursor xTC = textCursorOfBlock(vBlocks[0], false);
-		QTextEdit::setTextCursor(xTC);
-		QRect rc = QTextEdit::cursorRect(xTC);
-		QTextEdit::horizontalScrollBar()->setValue(0);
-		QTextEdit::verticalScrollBar()->setValue(QTextEdit::verticalScrollBar()->value() + rc.top());
-		m_pBookmarkBlinker->blink(vBlocks);
 	}
 }
 

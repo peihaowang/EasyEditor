@@ -41,57 +41,6 @@ void _CHighlighterOccurrence::highlightBlock(const QString& sText)
 
 ///////////////////////////////////////////////////////////
 
-_CBlockBlink::_CBlockBlink(_CMyRichEdit* edit)
-	: QObject(edit)
-	, m_pEdit(edit)
-{
-	m_pTimer = new QTimer(this);
-	m_pTimer->setInterval(50);
-	QObject::connect(m_pTimer, SIGNAL(timeout()), this, SLOT(onFadeIn()));
-}
-
-void _CBlockBlink::blink(const QList<QTextBlock>& vBlocks)
-{
-	if(m_pEdit){
-		m_pTimer->stop();
-		m_clBackground = QColor(70, 162, 218, 255);
-		QList<QTextEdit::ExtraSelection> vSelections;
-		Q_FOREACH(QTextBlock xBlock, vBlocks){
-			QTextEdit::ExtraSelection xSelection;
-			QTextCharFormat xFmt;
-			xFmt.setBackground(m_clBackground);
-			xFmt.setProperty(QTextFormat::FullWidthSelection, true);
-			xSelection.cursor = m_pEdit->textCursorOfBlock(xBlock, true);
-			xSelection.format = xFmt;
-			vSelections << xSelection;
-		}
-		m_pEdit->setExtraSelections(vSelections);
-		m_pTimer->start();
-	}
-}
-
-void _CBlockBlink::onFadeIn()
-{
-	if(m_pEdit){
-		int alpha = m_clBackground.alpha(); alpha -= 12;
-		if(alpha <= 10){
-			m_pTimer->stop();
-			m_pEdit->setExtraSelections(QList<QTextEdit::ExtraSelection>());
-		}else{
-			m_clBackground.setAlpha(alpha);
-			QList<QTextEdit::ExtraSelection> vNewSelections, vSelections = m_pEdit->extraSelections();
-			Q_FOREACH(QTextEdit::ExtraSelection xSelection, vSelections){
-				QTextEdit::ExtraSelection xNewSelection = xSelection;
-				xNewSelection.format.setBackground(m_clBackground);
-				vNewSelections << xNewSelection;
-			}
-			m_pEdit->setExtraSelections(vNewSelections);
-		}
-	}
-}
-
-///////////////////////////////////////////////////////////
-
 void _CTextImage::_unserialize(const QDomElement& xDomEle)
 {
 	if(xDomEle.tagName() == "imgres"){
@@ -127,6 +76,25 @@ QPixmap _CTextImage::sourcePixmap() const
 	return xImg;
 }
 
+QPixmap _CTextImage::transformedPixmap(Qt::TransformationMode iTransformMode) const
+{
+	QPixmap xSource = sourcePixmap();
+	if(!xSource.isNull()){
+		qreal nScaleX = scaleValX(), nScaleY = scaleValY();
+		int nRotation = rotation() > 0 ? rotation() : 0;
+
+		QTransform xTransform;
+		if(nRotation != 0){
+			xTransform.translate((double)xSource.width() / 2.0, (double)xSource.height() / 2.0);	//2016.10.23 Set rotation center
+			xTransform.rotate(nRotation);
+		}
+		if(nScaleX != 1.0 || nScaleY != 1.0) xTransform.scale(nScaleX, nScaleY);
+		xSource = xSource.transformed(xTransform, iTransformMode);
+	}
+
+	return xSource;
+}
+
 void _CTextImage::setSource(const QPixmap& xPixmap, const QString& sFormat)
 {
 	m_sFormat = sFormat; if(m_sFormat.isEmpty()) m_sFormat = "png";
@@ -152,6 +120,18 @@ void _CTextImage::setSource(const QPixmap& xPixmap, const QString& sFormat)
 			m_sUrl = xUrl.toString();
 		}
 	}
+}
+
+QTextImageFormat _CTextImage::constructTextImageFmt() const
+{
+	QTextImageFormat xImgFmt;
+	xImgFmt.setName(url());
+
+	QPixmap xPixmap = transformedPixmap();
+	xImgFmt.setWidth((qreal)xPixmap.width());
+	xImgFmt.setHeight((qreal)xPixmap.height());
+
+	return xImgFmt;
 }
 
 ///////////////////////////////////////////////////////////
@@ -189,12 +169,12 @@ _CUndoCmdInsertImage::_CUndoCmdInsertImage(_CMyDocument* pDocument, const _CText
 }
 
 void _CUndoCmdInsertImage::undo(){
-	m_pTextDocument->m_mImageResources.remove(QUrl(m_xTextImage.url()));
-	m_pTextDocument->m_mImageCache.remove(m_xTextImage.url());
+	m_pTextDocument->removeImageResource(QUrl(m_xTextImage.url()));
+	m_pTextDocument->clearImageCache(QUrl(m_xTextImage.url()));
 }
 
 void _CUndoCmdInsertImage::redo(){
-	m_pTextDocument->m_mImageResources[QUrl(m_xTextImage.url())] = m_xTextImage;
+	m_pTextDocument->addImageResource(QUrl(m_xTextImage.url()), m_xTextImage);
 }
 
 ///////////////////////////////////////////////////////////
@@ -210,13 +190,37 @@ _CUndoCmdRotateImage::_CUndoCmdRotateImage(_CMyDocument* pDocument, const QStrin
 
 void _CUndoCmdRotateImage::swap()
 {
-	QMap<QUrl, _CTextImage>::iterator it = m_pTextDocument->m_mImageResources.find(QUrl(m_sUrl));
-	if(it != m_pTextDocument->m_mImageResources.end()){
-		int nOldVal = it.value().rotation();
-		it.value().rotate(m_nVal);
+	QUrl xUrl(m_sUrl); _CTextImage* pImage = m_pTextDocument->imageOf(xUrl);
+	if(pImage){
+		int nOldVal = pImage->rotation();
+		pImage->rotate(m_nVal);
 		m_nVal = nOldVal;
 
-		m_pTextDocument->m_mImageCache.remove(QUrl(m_sUrl));
+		m_pTextDocument->clearImageCache(xUrl);
+	}
+}
+
+///////////////////////////////////////////////////////////
+
+_CUndoCmdScaleImage::_CUndoCmdScaleImage(_CMyDocument* pDocument, const QString &sUrl, double nValX, double nValY, QUndoCommand* parent)
+	: QUndoCommand(parent)
+	, m_pTextDocument(pDocument)
+	, m_sUrl(sUrl)
+	, m_nValX(nValX)
+	, m_nValY(nValY)
+{
+	return;
+}
+
+void _CUndoCmdScaleImage::swap()
+{
+	QUrl xUrl(m_sUrl); _CTextImage* pImage = m_pTextDocument->imageOf(xUrl);
+	if(pImage){
+		double nOldValX = pImage->scaleValX(), nOldValY = pImage->scaleValY();
+		pImage->scale(m_nValX, m_nValY);
+		m_nValX = nOldValX; m_nValY = nOldValY;
+
+		m_pTextDocument->clearImageCache(xUrl);
 	}
 }
 
@@ -232,34 +236,6 @@ _CMyDocument::_CMyDocument(QObject* parent)
 void _CMyDocument::loadDocument(const QString& sText, QString* sErrMsg, int* nErrLine, int* nErrCol)
 {
 	QDomDocument xDomDoc; xDomDoc.setContent(sText, sErrMsg, nErrLine, nErrCol);
-
-//	QRegularExpression xRE("^(\\s*)\\n(\\s*)\\n", QRegularExpression::MultilineOption);
-//	QRegularExpressionMatch xMatch; sText.indexOf(xRE, 0, &xMatch);
-
-//	if(xMatch.isValid()){
-//		QString sResources = sText.mid(0, xMatch.capturedStart() + 1);
-//		QString sHtml = sText.mid(xMatch.capturedEnd() + 1);
-
-//		//2018.1.29 Identify resources
-//		{
-//			QDomDocument xDomDocRes; xDomDocRes.setContent(sResources);
-//			if(!xDomDocRes.isNull()){
-//				QDomNodeList vImgs = xDomDocRes.documentElement().elementsByTagName("imgres");
-//				for(int i = 0; i < vImgs.count(); i++){
-//					QDomNode xNode = vImgs.item(i);
-//					if(xNode.isElement()){
-//						_CTextImage xTextImg(xNode.toElement());
-//						m_mImageResources[QUrl(xTextImg.url())] = xTextImg;
-//					}
-//				}
-//			}
-//		}
-
-//		//2018.1.23 Set html content
-//		QTextDocument::setHtml(sHtml);
-//		QTextDocument::setModified(false);
-//	}
-
 
 	//2018.1.23 Identify resources
 	{
@@ -281,7 +257,6 @@ void _CMyDocument::loadDocument(const QString& sText, QString* sErrMsg, int* nEr
 	}
 
 	//2018.1.23 Set html content
-//	QTextDocument::setHtml(xDomDoc.toString());
 	QTextDocument::setHtml(sText);
 	QTextDocument::setModified(false);
 }
@@ -307,24 +282,49 @@ QString _CMyDocument::toString(QString* sErrMsg, int* nErrLine, int* nErrCol) co
 	return xDomDoc.toString(-1);
 }
 
-QPixmap _CMyDocument::sourceImage(const _CTextImage& xTextImg, bool bOrigin) const
+bool _CMyDocument::existsImage(const QUrl& xUrlImg) const
 {
-	QPixmap xSource = xTextImg.sourcePixmap();
-	if(!xSource.isNull() && !bOrigin){
-		qreal nScaleX = xTextImg.scaleValX(), nScaleY = xTextImg.scaleValY();
-		int rotation = xTextImg.rotation() > 0 ? xTextImg.rotation() : 0;
+	return m_mImageResources.contains(xUrlImg);
+}
 
-		Qt::TransformationMode nMode = Qt::FastTransformation; // Qt::SmoothTransformation
-		QTransform xTransform;
-		if(rotation != 0){
-			xTransform.translate((double)xSource.width() / 2.0, (double)xSource.height() / 2.0);	//2016.10.23 Set rotation center
-			xTransform.rotate(rotation);
-		}
-		if(nScaleX != 1.0 || nScaleY != 1.0) xTransform.scale(nScaleX, nScaleY);
-		xSource = xSource.transformed(xTransform, nMode);
+_CTextImage* _CMyDocument::imageOf(const QUrl &xUrlImg)
+{
+	_CTextImage* pTextImage = NULL;
+	QMap<QUrl, _CTextImage>::iterator it = m_mImageResources.find(xUrlImg);
+	if(it != m_mImageResources.end()){
+		pTextImage = &it.value();
 	}
+	return pTextImage;
+}
 
-	return xSource;
+void _CMyDocument::cleanUnlinkedImages()
+{
+	QDomDocument xDomDoc; xDomDoc.setContent(QTextDocument::toHtml());
+	QDomElement xEleBody = xDomDoc.documentElement().firstChildElement("body");
+	if(!xEleBody.isNull()){
+		_CPredCollectImgUrls xPred;
+		_CXmlUtils::travelDomChildElements(xEleBody, xPred);
+
+		QList<QUrl> vToRemove;
+		QMap<QUrl, _CTextImage>::iterator it;
+		for(it = m_mImageResources.begin(); it != m_mImageResources.end(); it++){
+			if(xPred.m_vImgUrls.indexOf(it.key()) < 0){
+				vToRemove << it.key();
+			}
+		}
+		Q_FOREACH(QUrl xUrl, vToRemove){
+			removeImageResource(xUrl);
+		}
+	}
+}
+
+void _CMyDocument::clearImageCache(const QUrl& xUrlImg)
+{
+	if(!xUrlImg.isEmpty()){
+		m_mImageCache.remove(xUrlImg);
+	}else{
+		m_mImageCache.clear();
+	}
 }
 
 void _CMyDocument::pushToUndoStack(QUndoCommand* pUndoCmd)
@@ -356,27 +356,6 @@ void _CMyDocument::_redo()
 	}
 }
 
-void _CMyDocument::cleanUnlinkedImages()
-{
-	QDomDocument xDomDoc; xDomDoc.setContent(QTextDocument::toHtml());
-	QDomElement xEleBody = xDomDoc.documentElement().firstChildElement("body");
-	if(!xEleBody.isNull()){
-		_CPredCollectImgUrls xPred;
-		_CXmlUtils::travelDomChildElements(xEleBody, xPred);
-
-		QList<QUrl> vToRemove;
-		QMap<QUrl, _CTextImage>::iterator it;
-		for(it = m_mImageResources.begin(); it != m_mImageResources.end(); it++){
-			if(xPred.m_vImgUrls.indexOf(it.key()) < 0){
-				vToRemove << it.key();
-			}
-		}
-		Q_FOREACH(QUrl xUrl, vToRemove){
-			m_mImageResources.remove(xUrl);
-		}
-	}
-}
-
 QVariant _CMyDocument::loadResource(int type, const QUrl& name)
 {
 	QVariant xRes;
@@ -387,9 +366,9 @@ QVariant _CMyDocument::loadResource(int type, const QUrl& name)
 			if(itCache != m_mImageCache.end()){
 				xImg = itCache.value();
 			}else{
-				QMap<QUrl, _CTextImage>::const_iterator itRes = m_mImageResources.find(name);
-				if(itRes != m_mImageResources.end()){
-					xImg = sourceImage(itRes.value(), false);
+				_CTextImage* pTextImage = imageOf(name);
+				if(pTextImage){
+					xImg = pTextImage->transformedPixmap();
 					m_mImageCache[name] = xImg;
 				}
 			}

@@ -28,6 +28,8 @@ public:
 
 	QStringList			m_vMruFiles;
 
+	bool				m_bDlgScale_KeepAspectRatio;
+
 	bool				m_bFindTextWithCase;
 	bool				m_bFindTextWholeWord;
 	bool				m_bFindTextHighlightAll;
