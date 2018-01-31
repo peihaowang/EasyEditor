@@ -75,5 +75,6 @@
         <file>images/btn_cut.svg</file>
         <file>images/btn_paste.svg</file>
         <file>images/btn_hyperlink_edit.svg</file>
+        <file>images/ico_dropdown.svg</file>
     </qresource>
 </RCC>
