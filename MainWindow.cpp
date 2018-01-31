@@ -9,6 +9,8 @@
 #include "MenuColor.h"
 #include "MenuUnderline.h"
 
+#include "MacUnifiedToolBar.h"
+
 #include "MainWindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -443,6 +445,37 @@ MainWindow::MainWindow(QWidget *parent)
 	}
 
 	//Toolbar
+#if defined(Q_OS_MAC)
+	QUnifiedToolBar* pTB = new QUnifiedToolBar(this);
+	pTB->setMovable(false);
+	pTB->addAction("File", m_pActionNew);
+	pTB->addAction("File", m_pActionOpen);
+	pTB->addAction("File", m_pActionSave);
+
+	pTB->addAction("Format", m_pActionBold);
+	pTB->addAction("Format", m_pActionItalic);
+	pTB->addWidget("Format", pBtnUnderline);
+
+	pTB->addWidget("Font", m_pComboTextFamily);
+	pTB->addWidget("Font", m_pComboTextSize);
+
+	pTB->addWidget("Color", m_pBtnTextForeColor);
+	pTB->addWidget("Color", m_pBtnTextBackColor);
+
+	pTB->addAction("Indent", m_pActionOutdent);
+	pTB->addAction("Indent", m_pActionIndent);
+
+	pTB->addWidget("List", pBtnInsOrderedList);
+	pTB->addWidget("List", pBtnInsUnorderedList);
+
+	pTB->addAction("Image", m_pActionInsImage);
+	pTB->addAction("Image", m_pActionRotateImage);
+	pTB->addAction("Image", m_pActionScaleImage);
+
+	pTB->addAction("Table", m_pActionInsTable);
+
+	QMainWindow::addToolBar(Qt::TopToolBarArea, pTB);
+#else
 	QToolBar* pTB = QMainWindow::addToolBar("General");
 	pTB->setIconSize(QSize(18, 18));
 	pTB->addAction(m_pActionNew);
@@ -470,6 +503,7 @@ MainWindow::MainWindow(QWidget *parent)
 	pTB->addAction(m_pActionScaleImage);
 	pTB->addSeparator();
 	pTB->addAction(m_pActionInsTable);
+#endif
 
 	onLoadRecentFiles();
 	updateEditActionsState();

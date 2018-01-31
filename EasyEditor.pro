@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     MyRichEdit.cpp \
     PanelFindReplace.cpp \
     MyDocument.cpp \
-    MainWindow.cpp
+    MainWindow.cpp \
+    MacUnifiedToolBar.cpp
 
 HEADERS  += \
     app_settings.h \
@@ -43,7 +44,8 @@ HEADERS  += \
     string_utilities.h \
     type_defs.h \
     MyDocument.h \
-    MainWindow.h
+    MainWindow.h \
+    MacUnifiedToolBar.h
 
 RESOURCES += \
     res.qrc
