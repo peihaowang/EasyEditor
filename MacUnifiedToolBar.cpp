@@ -1,5 +1,6 @@
 
 #include "common_headers.h"
+#include <QSvgRenderer>
 
 #include "MacUnifiedToolBar.h"
 
@@ -18,13 +19,10 @@ _CToolItemsGroup::_CToolItemsGroup(const QString& sGroupName, QWidget* parent)
 			      "QToolButton::active:checked{background: #9A9A9A; border-color: #9A9A9A;}"
 			      "QToolButton::!active:checked{background: #DCDCDC; border-color: #CACACA;}"
 			      "QToolButton[popupMode='1']{padding-right: 16px;}"
-			      //"QToolButton::menu-button{border: 1px solid transparent; border-left: 0px none transparent;  padding-top: 3px; padding-bottom: 3px;}"
 			      "QToolButton::menu-button{border-width: 1px; padding-top: 3px; padding-bottom: 3px; padding-right: 6px;}"
-			      "QToolButton::menu-arrow{left: 0px; image: url(:/images/ico_dropdown.svg);}"
-			      "QToolButton[checked='true'][__active='true']::menu-arrow{left: 0px; image: url(:/images/ico_dropdown_white.png);}"
+			      "QToolButton::menu-arrow{image: url(:/images/ico_dropdown.svg); width: 10px;}"
+			      "QToolButton[checked='true'][__active='true']::menu-arrow{image: url(:/images/ico_dropdown_white.svg); width: 10px;}"
 			      ;
-
-//	m_sQssForToolButton=g_xOpt.applyCustomImgDirInQss(m_sQssForToolButton);
 
 	m_pLayoutToolItems = new QHBoxLayout;
 	m_pLayoutToolItems->setSpacing(2);
