@@ -20,6 +20,8 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_bTextFamilySetable(true)
 	, m_bTextSizeSetable(true)
 {
+	QMainWindow::setWindowIcon(QIcon(":/images/ico_app_logo.ico"));
+
 	m_pTabDocuments = new QTabWidget(this);
 	m_pTabDocuments->setDocumentMode(true);
 	m_pTabDocuments->setTabsClosable(true);
