@@ -73,6 +73,13 @@ QPanelFindReplace::QPanelFindReplace(QWidget* parent)
 	m_pBtnClose->setIcon(m_pBtnClose->style()->standardIcon(QStyle::SP_DockWidgetCloseButton));
 	m_pBtnClose->setIconSize(QSize(10, 10));
 	m_pBtnClose->setToolTip("Close");
+#if defined(Q_OS_MAC)
+	m_pBtnClose->setStyleSheet("QToolButton{background-color: transparent; border: 0px none transparent; padding: 2px;}"
+		"QToolButton::hover{background-color: rgba(200, 200, 200, 150); border: 1px solid gray; border-radius: 2px;}"
+		"QToolButton::pressed{background-color: rgba(150, 150, 150, 150); border: 1px solid gray; border-radius: 2px;}"
+	);
+#endif
+
 	QObject::connect(m_pBtnClose, SIGNAL(clicked()), this, SLOT(onClosePanel()));
 
 	QHBoxLayout* pLayoutTop = new QHBoxLayout;
@@ -99,7 +106,7 @@ QPanelFindReplace::QPanelFindReplace(QWidget* parent)
 	pLayoutBottom->addStretch();
 
 	QVBoxLayout* pLayoutMain = new QVBoxLayout;
-	pLayoutMain->setContentsMargins(6, 3, 0, 3);
+	pLayoutMain->setContentsMargins(6, 3, 6, 3);
 	pLayoutMain->addLayout(pLayoutTop);
 	pLayoutMain->addLayout(pLayoutCenter);
 	pLayoutMain->addLayout(pLayoutBottom);

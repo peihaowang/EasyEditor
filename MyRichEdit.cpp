@@ -124,14 +124,38 @@ void _CMyRichEdit::saveAs(const QString& sFn) const
 {
 //	QString sHtml = QTextEdit::toHtml();
 	m_pTextDocument->cleanUnlinkedImages();
-	QString sHtml = m_pTextDocument->toString();
+	QString sContent = m_pTextDocument->content();
+	_CTextFile::saveUtf8(sFn, sContent, true);
+}
+
+void _CMyRichEdit::exportAsHtml(const QString &sFn) const
+{
+	m_pTextDocument->cleanUnlinkedImages();
+	QString sHtml = m_pTextDocument->convertToHtml();
 	_CTextFile::saveUtf8(sFn, sHtml, true);
 }
 
-void _CMyRichEdit::setHtmlText(const QString& sHtml, const QUrl& xUrl)
+void _CMyRichEdit::exportAsPdf(const QString &sFn) const
 {
-	m_pTextDocument->setBaseUrl(xUrl);
-	m_pTextDocument->setHtml(sHtml);
+//	m_pTextDocument->cleanUnlinkedImages();
+//	QString sHtml = m_pTextDocument->convertToHtml();
+//	_CTextFile::saveUtf8(sFn, sHtml, true);
+}
+
+void _CMyRichEdit::exportAsPlainText(const QString &sFn) const
+{
+	m_pTextDocument->cleanUnlinkedImages();
+	QString sText = m_pTextDocument->toPlainText();
+	_CTextFile::saveUtf8(sFn, sText, true);
+}
+
+void _CMyRichEdit::exportSelectedImage(const QString &sFn) const
+{
+	_CTextImage* pImage = currentImage();
+	if(pImage){
+		QPixmap xImage = pImage->transformedPixmap();
+		xImage.save(sFn);
+	}
 }
 
 bool _CMyRichEdit::fontBold() const
@@ -1168,6 +1192,8 @@ void _CMyRichEdit::mouseReleaseEvent(QMouseEvent* e)
 
 void _CMyRichEdit::keyPressEvent(QKeyEvent* e)
 {
+	bool bHandle = false;
+	//implement list level
 	if(e->key() == Qt::Key_Tab){
 		int nBegin = -1, nEnd = -1; selection(nBegin, nEnd);
 		QTextListFormat::Style iStyle = blockTextListStyle();
@@ -1182,8 +1208,7 @@ void _CMyRichEdit::keyPressEvent(QKeyEvent* e)
 		int nPosInBlock = QTextEdit::textCursor().positionInBlock();
 		if(iStyle != QTextListFormat::ListStyleUndefined && (nSelLen > 0 || nPosInBlock == 0)){
 			demoteAsChildList();
-		}else{
-			QTextEdit::keyPressEvent(e);
+			bHandle = true;
 		}
 	}else if(e->key() == Qt::Key_Backspace){
 		int nBegin = -1, nEnd = -1; selection(nBegin, nEnd);
@@ -1192,11 +1217,18 @@ void _CMyRichEdit::keyPressEvent(QKeyEvent* e)
 		int nPosInBlock = QTextEdit::textCursor().positionInBlock();
 		if(xBlockCurrent.textList() && (nSelLen > 0 || nPosInBlock == 0)){
 			promoteToParentList();
+			bHandle = true;
+		}
+	}
+	if(!bHandle){
+		//2018.2.3 reimplement default commands
+		if(e->matches(QKeySequence::Undo)){
+			_undo();
+		}else if(e->matches(QKeySequence::Redo)){
+			_redo();
 		}else{
 			QTextEdit::keyPressEvent(e);
 		}
-	}else{
-		QTextEdit::keyPressEvent(e);
 	}
 }
 

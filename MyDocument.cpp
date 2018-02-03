@@ -226,6 +226,27 @@ void _CUndoCmdScaleImage::swap()
 
 ///////////////////////////////////////////////////////////
 
+void _CMyDocument::_CPredCollectImgUrls::operator()(QDomElement &xDomEle){
+	if(xDomEle.tagName().toLower() == "img"){
+		QString sUrl = xDomEle.attribute("src", "");
+		if(!sUrl.isEmpty()) m_vImgUrls << QUrl(sUrl);
+	}
+}
+
+void _CMyDocument::_CPredRestoreImgSource::operator()(QDomElement &xDomEle){
+	if(xDomEle.tagName().toLower() == "img"){
+		QString sUrl = xDomEle.attribute("src", "");
+		const _CTextImage* pImg = m_pTextDocument->imageOf(QUrl(sUrl));
+		if(pImg){
+			QPixmap xImg = pImg->transformedPixmap(); QString sFmt = "png";
+			QString sSrc = QString("data:image/%1;base64,%2").arg(sFmt).arg(_CPixmapEx(xImg).toBase64(sFmt));
+			xDomEle.setAttribute("src", sSrc);
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////
+
 _CMyDocument::_CMyDocument(QObject* parent)
 	: QTextDocument(parent)
 {
@@ -233,9 +254,9 @@ _CMyDocument::_CMyDocument(QObject* parent)
 	QObject::connect(this, SIGNAL(undoCommandAdded()), this, SLOT(onUndoCommandAdded()));
 }
 
-void _CMyDocument::loadDocument(const QString& sText, QString* sErrMsg, int* nErrLine, int* nErrCol)
+void _CMyDocument::loadDocument(const QString& sText)
 {
-	QDomDocument xDomDoc; xDomDoc.setContent(sText, sErrMsg, nErrLine, nErrCol);
+	QDomDocument xDomDoc; xDomDoc.setContent(sText);
 
 	//2018.1.23 Identify resources
 	{
@@ -261,9 +282,9 @@ void _CMyDocument::loadDocument(const QString& sText, QString* sErrMsg, int* nEr
 	QTextDocument::setModified(false);
 }
 
-QString _CMyDocument::toString(QString* sErrMsg, int* nErrLine, int* nErrCol) const
+QString _CMyDocument::content() const
 {
-	QDomDocument xDomDoc; xDomDoc.setContent(QTextDocument::toHtml(), sErrMsg, nErrLine, nErrCol);
+	QDomDocument xDomDoc; xDomDoc.setContent(QTextDocument::toHtml());
 	QDomElement xEleHead = xDomDoc.documentElement().firstChildElement("head");
 	if(xEleHead.isNull()){
 		xEleHead = xDomDoc.createElement("head");
@@ -282,9 +303,38 @@ QString _CMyDocument::toString(QString* sErrMsg, int* nErrLine, int* nErrCol) co
 	return xDomDoc.toString(-1);
 }
 
+QString _CMyDocument::convertToHtml() const
+{
+	QDomDocument xDomDoc; xDomDoc.setContent(content());
+
+	//2018.2.3 Remove resource tag
+	QDomElement xEleHead = xDomDoc.documentElement().firstChildElement("head");
+	if(!xEleHead.isNull()){
+		QDomElement xEleResources = xEleHead.firstChildElement("__resources__");
+		xEleHead.removeChild(xEleResources);
+	}
+	QDomElement xEleBody = xDomDoc.documentElement().firstChildElement("body");
+	if(!xEleBody.isNull()){
+		_CPredRestoreImgSource xPred(this);
+		_CXmlUtils::travelDomChildElements(xEleBody, xPred);
+	}
+
+	return xDomDoc.toString();
+}
+
 bool _CMyDocument::existsImage(const QUrl& xUrlImg) const
 {
 	return m_mImageResources.contains(xUrlImg);
+}
+
+const _CTextImage* _CMyDocument::imageOf(const QUrl& xUrlImg) const
+{
+	const _CTextImage* pTextImage = NULL;
+	QMap<QUrl, _CTextImage>::const_iterator it = m_mImageResources.find(xUrlImg);
+	if(it != m_mImageResources.end()){
+		pTextImage = &it.value();
+	}
+	return pTextImage;
 }
 
 _CTextImage* _CMyDocument::imageOf(const QUrl &xUrlImg)

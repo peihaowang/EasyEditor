@@ -33,6 +33,10 @@ protected:
 	QAction *			m_pActionOpen;
 	QAction *			m_pActionSave;
 
+	QAction *			m_pActionExportAsHtml;
+	QAction *			m_pActionExportAsPdf;
+	QAction *			m_pActionExportAsText;
+
 	QAction *			m_pActionUndo;
 	QAction *			m_pActionRedo;
 
@@ -83,6 +87,7 @@ protected:
 	QAction *			m_pActionInsImage;
 	QAction *			m_pActionRotateImage;
 	QAction *			m_pActionScaleImage;
+	QAction *			m_pActionExportImage;
 
 	QAction *			m_pActionInsTable;
 	QAction *			m_pActionInsRowBefore;
@@ -104,6 +109,10 @@ protected:
 
 	QAction *			m_pActionEditHyperlink;
 	QAction *			m_pActionCancelHyperlink;
+
+	QAction *			m_pActionGitHub;
+	QAction *			m_pActionAboutQt;
+	QAction *			m_pActionAbout;
 
 	QLabel *			m_pDisplayDefault;
 	QLabel *			m_pDisplayExtraInfo;
@@ -148,6 +157,10 @@ protected slots:
 	void onOpenFile();
 	void onSaveFile();
 
+	void onExportAsHtml();
+	void onExportAsPdf();
+	void onExportAsText();
+
 	void onFindText();
 	void onReplaceText();
 	void onFindPanelVisibilityChanged(bool bVisible);
@@ -167,6 +180,7 @@ protected slots:
 	void onSetListStyle();
 
 	void onInsertImage();
+	void onExportImage();
 	void onRotateImage();
 	void onScaleImage();
 
@@ -176,6 +190,9 @@ protected slots:
 
 	void onEditHyperlink();
 	void onCancelHyperlink();
+
+	void onViewGitHub();
+	void onAbout();
 
 	void onHyperlinkHovered(const QString& sUrl);
 	void onHyperlinkClicked(const QString& sUrl);

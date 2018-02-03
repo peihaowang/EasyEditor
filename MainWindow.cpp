@@ -56,57 +56,72 @@ MainWindow::MainWindow(QWidget *parent)
 	m_pActionNew = new QAction(this);
 	m_pActionNew->setText("New File ...");
 	m_pActionNew->setIcon(QIcon(":/images/btn_newfile.svg"));
-	m_pActionNew->setShortcut(QKeySequence("Ctrl+N"));
+	m_pActionNew->setShortcut(QKeySequence(QKeySequence::New));
 	QObject::connect(m_pActionNew, SIGNAL(triggered(bool)), this, SLOT(onNewFile()));
 
 	m_pActionOpen = new QAction(this);
 	m_pActionOpen->setText("Open File ...");
 	m_pActionOpen->setIcon(QIcon(":/images/btn_open.svg"));
-	m_pActionOpen->setShortcut(QKeySequence("Ctrl+O"));
+	m_pActionOpen->setShortcut(QKeySequence(QKeySequence::Open));
 	QObject::connect(m_pActionOpen, SIGNAL(triggered(bool)), this, SLOT(onOpenFile()));
 
 	m_pActionSave = new QAction(this);
 	m_pActionSave->setText("Save File");
 	m_pActionSave->setEnabled(false);
 	m_pActionSave->setIcon(QIcon(":/images/btn_save.svg"));
-	m_pActionSave->setShortcut(QKeySequence("Ctrl+S"));
+	m_pActionSave->setShortcut(QKeySequence(QKeySequence::Save));
 	QObject::connect(m_pActionSave, SIGNAL(triggered(bool)), this, SLOT(onSaveFile()));
+
+	m_pActionExportAsHtml = new QAction(this);
+	m_pActionExportAsHtml->setText("HTML Document ...");
+	m_pActionExportAsHtml->setEnabled(false);
+	QObject::connect(m_pActionExportAsHtml, SIGNAL(triggered(bool)), this, SLOT(onExportAsHtml()));
+
+	m_pActionExportAsPdf = new QAction(this);
+	m_pActionExportAsPdf->setText("PDF Document ...");
+	m_pActionExportAsPdf->setEnabled(false);
+	QObject::connect(m_pActionExportAsPdf, SIGNAL(triggered(bool)), this, SLOT(onExportAsPdf()));
+
+	m_pActionExportAsText = new QAction(this);
+	m_pActionExportAsText->setText("Plain Text ...");
+	m_pActionExportAsText->setEnabled(false);
+	QObject::connect(m_pActionExportAsText, SIGNAL(triggered(bool)), this, SLOT(onExportAsText()));
 
 	m_pActionUndo = new QAction(this);
 	m_pActionUndo->setEnabled(false);
 	m_pActionUndo->setText("Undo");
 	m_pActionUndo->setIcon(QIcon(":/images/btn_undo.svg"));
-	m_pActionUndo->setShortcut(QKeySequence("Ctrl+Z"));
+	m_pActionUndo->setShortcut(QKeySequence(QKeySequence::Undo));
 
 	m_pActionRedo = new QAction(this);
 	m_pActionRedo->setEnabled(false);
 	m_pActionRedo->setText("Redo");
 	m_pActionRedo->setIcon(QIcon(":/images/btn_redo.svg"));
-	m_pActionRedo->setShortcut(QKeySequence("Ctrl+Y"));
+	m_pActionRedo->setShortcut(QKeySequence(QKeySequence::Redo));
 
 	m_pActionCut = new QAction(this);
 	m_pActionCut->setText("Cut");
 	m_pActionCut->setIcon(QIcon(":/images/btn_cut.svg"));
-	m_pActionCut->setShortcut(QKeySequence("Ctrl+X"));
+	m_pActionCut->setShortcut(QKeySequence(QKeySequence::Cut));
 
 	m_pActionCopy = new QAction(this);
 	m_pActionCopy->setText("Copy");
 	m_pActionCopy->setIcon(QIcon(":/images/btn_copy.svg"));
-	m_pActionCopy->setShortcut(QKeySequence("Ctrl+C"));
+	m_pActionCopy->setShortcut(QKeySequence(QKeySequence::Copy));
 
 	m_pActionPaste = new QAction(this);
 	m_pActionPaste->setText("Paste");
 	m_pActionPaste->setIcon(QIcon(":/images/btn_paste.svg"));
-	m_pActionPaste->setShortcut(QKeySequence("Ctrl+V"));
+	m_pActionPaste->setShortcut(QKeySequence(QKeySequence::Paste));
 
 	m_pActionFindText = new QAction(this);
 	m_pActionFindText->setText("Find ...");
-	m_pActionFindText->setShortcut(QKeySequence("Ctrl+F"));
+	m_pActionFindText->setShortcut(QKeySequence(QKeySequence::Find));
 	QObject::connect(m_pActionFindText, SIGNAL(triggered(bool)), this, SLOT(onFindText()));
 
 	m_pActionReplaceText = new QAction(this);
 	m_pActionReplaceText->setText("Replace ...");
-	m_pActionReplaceText->setShortcut(QKeySequence("Ctrl+H"));
+	m_pActionReplaceText->setShortcut(QKeySequence(QKeySequence::Replace));
 	QObject::connect(m_pActionReplaceText, SIGNAL(triggered(bool)), this, SLOT(onReplaceText()));
 
 	m_pActionFont = new QAction(this);
@@ -117,16 +132,19 @@ MainWindow::MainWindow(QWidget *parent)
 	m_pActionBold->setCheckable(true);
 	m_pActionBold->setText("Bold");
 	m_pActionBold->setIcon(QIcon(":/images/btn_bold.svg"));
+	m_pActionBold->setShortcut(QKeySequence(QKeySequence::Bold));
 
 	m_pActionItalic = new QAction(this);
 	m_pActionItalic->setCheckable(true);
 	m_pActionItalic->setText("Italic");
 	m_pActionItalic->setIcon(QIcon(":/images/btn_italic.svg"));
+	m_pActionItalic->setShortcut(QKeySequence(QKeySequence::Italic));
 
 	m_pActionUnderline = new QAction(this);
 	m_pActionUnderline->setCheckable(true);
 	m_pActionUnderline->setText("Underline");
 	m_pActionUnderline->setIcon(QIcon(":/images/btn_underline.svg"));
+	m_pActionUnderline->setShortcut(QKeySequence(QKeySequence::Underline));
 	QObject::connect(m_pActionUnderline, SIGNAL(triggered(bool)), this, SLOT(onUnderline()));
 	QToolButton* pBtnUnderline = new QToolButton(this);
 	pBtnUnderline->setDefaultAction(m_pActionUnderline);
@@ -300,6 +318,11 @@ MainWindow::MainWindow(QWidget *parent)
 	m_pActionInsImage->setIcon(QIcon(":/images/btn_ins_img.svg"));
 	QObject::connect(m_pActionInsImage, SIGNAL(triggered(bool)), this, SLOT(onInsertImage()));
 
+	m_pActionExportImage = new QAction(this);
+	m_pActionExportImage->setEnabled(false);
+	m_pActionExportImage->setText("Export Image ...");
+	QObject::connect(m_pActionExportImage, SIGNAL(triggered(bool)), this, SLOT(onExportImage()));
+
 	m_pActionRotateImage = new QAction(this);
 	m_pActionRotateImage->setEnabled(false);
 	m_pActionRotateImage->setText("Rotate Image");
@@ -393,6 +416,21 @@ MainWindow::MainWindow(QWidget *parent)
 	m_pActionCancelHyperlink->setText("Cancel Hyperlink");
 	QObject::connect(m_pActionCancelHyperlink, SIGNAL(triggered(bool)), this, SLOT(onCancelHyperlink()));
 
+	m_pActionGitHub = new QAction(this);
+	m_pActionGitHub->setText("EasyEditor on GitHub");
+	QObject::connect(m_pActionCancelHyperlink, SIGNAL(triggered(bool)), this, SLOT(onViewGitHub()));
+
+	m_pActionAboutQt = new QAction(this);
+	m_pActionAboutQt->setMenuRole(QAction::AboutQtRole);
+	m_pActionAboutQt->setText("About Qt ...");
+	QObject::connect(m_pActionAboutQt, SIGNAL(triggered(bool)), qApp, SLOT(aboutQt()));
+
+	m_pActionAbout = new QAction(this);
+	m_pActionAbout->setMenuRole(QAction::AboutRole);
+	m_pActionAbout->setText("About EasyEditor ...");
+	QObject::connect(m_pActionAbout, SIGNAL(triggered(bool)), this, SLOT(onAbout()));
+
+
 	//Menubar
 	QMenuBar* pMB = QMainWindow::menuBar();
 	{
@@ -401,6 +439,14 @@ MainWindow::MainWindow(QWidget *parent)
 		pMenu->addAction(m_pActionNew);
 		pMenu->addAction(m_pActionOpen);
 		pMenu->addAction(m_pActionSave);
+		pMenu->addSeparator();
+		{
+			QMenu* pMenuExport = new QMenu("Export as ...", this);
+			pMenuExport->addAction(m_pActionExportAsHtml);
+			pMenuExport->addAction(m_pActionExportAsPdf);
+			pMenuExport->addAction(m_pActionExportAsText);
+			pMenu->addMenu(pMenuExport);
+		}
 	}
 	{
 		//Edit menu
@@ -458,6 +504,8 @@ MainWindow::MainWindow(QWidget *parent)
 		//Image menu
 		QMenu* pMenu = pMB->addMenu("&Image");
 		pMenu->addAction(m_pActionInsImage);
+		pMenu->addAction(m_pActionExportImage);
+		pMenu->addSeparator();
 		pMenu->addAction(m_pActionRotateImage);
 		pMenu->addAction(m_pActionScaleImage);
 	}
@@ -482,6 +530,14 @@ MainWindow::MainWindow(QWidget *parent)
 		pMenu->addSeparator();
 		pMenu->addAction(m_pActionWidenCols);
 		pMenu->addAction(m_pActionNarrowCols);
+	}
+	{
+		//About menu
+		QMenu* pMenu = pMB->addMenu("&Help");
+		pMenu->addAction(m_pActionGitHub);
+		pMenu->addSeparator();
+		pMenu->addAction(m_pActionAboutQt);
+		pMenu->addAction(m_pActionAbout);
 	}
 
 	//Toolbar
@@ -671,6 +727,10 @@ void MainWindow::createEdit(const QString& sFilePath)
 void MainWindow::updateEditActionsState()
 {
 	bool bHasEditor = m_pCurrentEdit;
+	m_pActionSave->setEnabled(bHasEditor && m_pCurrentEdit->isDirty());
+	m_pActionExportAsHtml->setEnabled(bHasEditor);
+	m_pActionExportAsPdf->setEnabled(bHasEditor);
+	m_pActionExportAsText->setEnabled(bHasEditor);
 	m_pActionUndo->setEnabled(bHasEditor && m_pCurrentEdit->isUndoAvailable());
 	m_pActionRedo->setEnabled(bHasEditor && m_pCurrentEdit->isRedoAvailable());
 	m_pActionCut->setEnabled(bHasEditor);
@@ -704,6 +764,7 @@ void MainWindow::updateEditActionsState()
 	m_pActionInsUnorderedList->setEnabled(bHasEditor);
 	m_pActionGrpBlockList->setEnabled(bHasEditor);
 	m_pActionInsImage->setEnabled(bHasEditor);
+	m_pActionExportImage->setEnabled(bHasEditor);
 	m_pActionRotateImage->setEnabled(bHasEditor);
 	m_pActionScaleImage->setEnabled(bHasEditor);
 	m_pActionInsTable->setEnabled(bHasEditor);
@@ -782,13 +843,13 @@ bool MainWindow::saveFile(int nIndex)
 		QString sFilePath = pRichEdit->filePath();
 		if(sFilePath.isEmpty() || !QFileInfo(sFilePath).exists()){
 			QString sFn = QFileDialog::getSaveFileName(
-						  this
-						  , "Save Document"
-						  , g_xOpt.m_sPathToOpenFile
-						  , "Rich Text (*.html *.htm);;All files(*.*)"
-						  , NULL
-						  , 0
-						  );
+				this
+				, "Save document"
+				, g_xOpt.m_sPathToOpenFile.isEmpty() ? QDir::homePath() : g_xOpt.m_sPathToOpenFile
+				, "Extended Rich Text (*.htmlx);;All files (*.*)"
+				, NULL
+				, 0
+			);
 			if(!sFn.isEmpty()){
 				pRichEdit->setFilePath(sFn);
 				pRichEdit->save();
@@ -945,7 +1006,7 @@ void MainWindow::onOpenFile()
 			this
 			, "Open rich text document"
 			, g_xOpt.m_sPathToOpenFile.isEmpty() ? QDir::homePath() : g_xOpt.m_sPathToOpenFile
-			, "Rich Text (*.html *.htm);;All files(*.*)"
+			, "Extended Rich Text (*.htmlx);;Hypertext (*.html *.htm);;All files (*.*)"
 			, NULL
 			, 0
 	);
@@ -958,6 +1019,60 @@ void MainWindow::onOpenFile()
 void MainWindow::onSaveFile()
 {
 	saveFile(m_pTabDocuments->currentIndex());
+}
+
+void MainWindow::onExportAsHtml()
+{
+	if(m_pCurrentEdit){
+		QString sFn = QFileDialog::getSaveFileName(
+			this
+			, "Export as HTML document"
+			, g_xOpt.m_sPathToExportFile.isEmpty() ? QDir::homePath() : g_xOpt.m_sPathToExportFile
+			, "Hypertext (*.html *.htm);;All files (*.*)"
+			, NULL
+			, 0
+		);
+		if(!sFn.isEmpty()){
+			m_pCurrentEdit->exportAsHtml(sFn);
+			g_xOpt.m_sPathToExportFile = QFileInfo(sFn).dir().absolutePath();
+		}
+	}
+}
+
+void MainWindow::onExportAsPdf()
+{
+	if(m_pCurrentEdit){
+		QString sFn = QFileDialog::getSaveFileName(
+			this
+			, "Export as PDF document"
+			, g_xOpt.m_sPathToExportFile.isEmpty() ? QDir::homePath() : g_xOpt.m_sPathToExportFile
+			, "Portable Document File (*.pdf);;All files (*.*)"
+			, NULL
+			, 0
+		);
+		if(!sFn.isEmpty()){
+			m_pCurrentEdit->exportAsPdf(sFn);
+			g_xOpt.m_sPathToExportFile = QFileInfo(sFn).dir().absolutePath();
+		}
+	}
+}
+
+void MainWindow::onExportAsText()
+{
+	if(m_pCurrentEdit){
+		QString sFn = QFileDialog::getSaveFileName(
+			this
+			, "Export as plain text document"
+			, g_xOpt.m_sPathToExportFile.isEmpty() ? QDir::homePath() : g_xOpt.m_sPathToExportFile
+			, "Plain Text Document (*.txt);;All files (*.*)"
+			, NULL
+			, 0
+		);
+		if(!sFn.isEmpty()){
+			m_pCurrentEdit->exportAsPlainText(sFn);
+			g_xOpt.m_sPathToExportFile = QFileInfo(sFn).dir().absolutePath();
+		}
+	}
 }
 
 void MainWindow::onFindText()
@@ -1080,7 +1195,7 @@ void MainWindow::onInsertImage()
 						 this
 						 , "Select pictures to insert into the document"
 						 , g_xOpt.m_sPathToInsImage.isEmpty() ? QDir::homePath() : g_xOpt.m_sPathToInsImage
-						 , "Images (*.png *.bmp *.jpeg *.jpg);;All files(*.*)"
+						 , "Images (*.png *.bmp *.jpeg *.jpg);;All files (*.*)"
 						 , NULL
 						 , 0
 						 );
@@ -1096,6 +1211,24 @@ void MainWindow::onInsertImage()
 void MainWindow::onRotateImage()
 {
 	if(m_pCurrentEdit) m_pCurrentEdit->rotateImage(m_pCurrentEdit->imageRotation() + 30);
+}
+
+void MainWindow::onExportImage()
+{
+	if(m_pCurrentEdit){
+		QString sFn = QFileDialog::getSaveFileName(
+			this
+			, "Export selected image"
+			, g_xOpt.m_sPathToInsImage.isEmpty() ? QDir::homePath() : g_xOpt.m_sPathToInsImage
+			, "Portable Network Graphics (*.png);;Joint Photographic Experts Group (*.jpg; *jpeg);;Bitmap (*.bmp);;All files (*.*)"
+			, NULL
+			, 0
+		);
+		if(!sFn.isEmpty()){
+			m_pCurrentEdit->exportSelectedImage(sFn);
+			g_xOpt.m_sPathToInsImage = QFileInfo(sFn).dir().absolutePath();
+		}
+	}
 }
 
 void MainWindow::onScaleImage()
@@ -1144,6 +1277,23 @@ void MainWindow::onEditHyperlink()
 void MainWindow::onCancelHyperlink()
 {
 	if(m_pCurrentEdit) m_pCurrentEdit->clearUrlForSelectedText();
+}
+
+void MainWindow::onViewGitHub()
+{
+	QDesktopServices::openUrl(QUrl("https://github.com/peihaowang/EasyEditor"));
+}
+
+void MainWindow::onAbout()
+{
+	QString sMsg = QString("<b style='font-size:20px;'>EasyEditor Beta-1</b>"
+		"<br/>Copyright %1 Peihao Wang. All rights reserved."
+		"<br/><br/><a href='https://github.com/peihaowang'>github.com/peihaowang</a>"
+		"<br/><a href='mailto:wangpeihao@gmail.com'>mailto:wangpeihao@gmail.com</a>"
+		"<br/><br/>A sophisticated editor for rich text editing and formatting, extended from HTML.")
+		.arg(QDate::currentDate().year() == 2018 ? "2018" : QString("2018 ~ %1").arg(QDate::currentDate().year()))
+		;
+	QMessageBox::about(this, "About EasyEditor", sMsg);
 }
 
 void MainWindow::onHyperlinkHovered(const QString& sUrl)
@@ -1241,6 +1391,7 @@ void MainWindow::onTextSelectionChanged(int nBegin, int nEnd)
 
 void MainWindow::onImageSelectionChanged(bool bSelected)
 {
+	m_pActionExportImage->setEnabled(bSelected);
 	m_pActionRotateImage->setEnabled(bSelected);
 	m_pActionScaleImage->setEnabled(bSelected);
 }

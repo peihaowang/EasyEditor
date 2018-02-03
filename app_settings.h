@@ -36,6 +36,7 @@ public:
 	bool				m_bFindTextRegExp;
 
 	QString				m_sPathToOpenFile;
+	QString				m_sPathToExportFile;
 	QString				m_sPathToInsImage;
 
 	QSize				m_szIconSize;

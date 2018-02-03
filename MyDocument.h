@@ -216,12 +216,16 @@ protected:
 	public:
 		QList<QUrl>		m_vImgUrls;
 	public:
-		void operator()(QDomElement& xDomEle){
-			if(xDomEle.tagName().toLower() == "img"){
-				QString sUrl = xDomEle.attribute("src", "");
-				if(!sUrl.isEmpty()) m_vImgUrls << QUrl(sUrl);
-			}
-		}
+		void operator()(QDomElement& xDomEle);
+	};
+
+	class _CPredRestoreImgSource
+	{
+	public:
+		const _CMyDocument *	m_pTextDocument;
+	public:
+		_CPredRestoreImgSource(const _CMyDocument* pTextDocument) : m_pTextDocument(pTextDocument){return;}
+		void operator()(QDomElement& xDomEle);
 	};
 
 public:
@@ -230,11 +234,13 @@ public:
 
 	_CMyDocument(QObject* parent);
 
-	void loadDocument(const QString& sText, QString* sErrMsg = NULL, int* nErrLine = NULL, int* nErrCol = NULL);
-	QString toString(QString* sErrMsg = NULL, int* nErrLine = NULL, int* nErrCol = NULL) const;
+	void loadDocument(const QString& sText);
+	QString content() const;
+	QString convertToHtml() const;
 
 	bool existsImage(const QUrl& xUrlImg) const;
 	//2018.1.30 It's not recommend to keep the returned pointer for a long period
+	const _CTextImage* imageOf(const QUrl& xUrlImg) const;
 	_CTextImage* imageOf(const QUrl& xUrlImg);
 
 	void addImageResource(const QUrl& xUrlImg, const _CTextImage& xTextImage){m_mImageResources[xUrlImg] = xTextImage;}
@@ -243,10 +249,9 @@ public:
 
 	void clearImageCache(const QUrl& xUrlImg = QUrl());
 
-	void pushToUndoStack(QUndoCommand* pUndoCmd);
-
 	void beginMacro(const QString& sText);
 	void endMacro();
+	void pushToUndoStack(QUndoCommand* pUndoCmd);
 
 	void _undo();
 	void _redo();

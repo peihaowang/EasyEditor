@@ -186,6 +186,7 @@ void _CAppSettings::_ddx(_CKeyValEntries& xKV, bool bGet)
 	iniDdx(xKV, bGet, "Find.Options.Highlight", m_bFindTextHighlightAll, true);
 
 	iniDdx(xKV, bGet, "App.Path.OpenFile", m_sPathToOpenFile, QString(""));
+	iniDdx(xKV, bGet, "App.Path.ExportFile", m_sPathToExportFile, QString(""));
 	iniDdx(xKV, bGet, "App.Path.InsImage", m_sPathToInsImage, QString(""));
 }
 

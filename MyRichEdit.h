@@ -263,18 +263,6 @@ protected:
 		}
 	};
 
-//	class _CImageUtils{
-
-//	protected:
-
-//		static void selectImages(const QDomElement& xDomEle);
-
-//	public:
-
-//		static QStringList extractImageUrls(const QString& sHtml);
-
-//	};
-
 protected slots:
 
 	void onDetectBlockFmtChanges();
@@ -312,7 +300,10 @@ public:
 	void save();
 	void saveAs(const QString& sFn) const;
 
-	void setHtmlText(const QString& sHtml, const QUrl& xUrl);
+	void exportAsHtml(const QString& sFn) const;
+	void exportAsPdf(const QString& sFn) const;
+	void exportAsPlainText(const QString& sFn) const;
+	void exportSelectedImage(const QString& sFn) const;
 
 	void beginEdit() const {QTextEdit::textCursor().beginEditBlock();}
 	void endEdit() const {QTextEdit::textCursor().endEditBlock();}
