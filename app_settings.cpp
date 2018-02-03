@@ -167,7 +167,11 @@ _CAppSettings::_CAppSettings()
 
 void _CAppSettings::_init()
 {
-	;
+#if defined (Q_OS_MAC)
+	m_szIconSize = QSize(18, 18);
+#else
+	m_szIconSize = QSize(16, 16);
+#endif
 }
 
 void _CAppSettings::_ddx(_CKeyValEntries& xKV, bool bGet)

@@ -99,6 +99,8 @@ QToolButton* QColorPicker::addColor(const QString& sName, const QColor& clColor)
 	m_pButtonsGroup->addButton(pColorBtn);
 	m_nCount++;
 
+	m_vAddedColors << clColor;
+
 	return pColorBtn;
 }
 
@@ -127,10 +129,14 @@ void QColorPicker::onMoreColor()
 	if(dlgColor.exec() == QColorDialog::Accepted){
 		QColor clColor = dlgColor.selectedColor();
 
-		_CPairVector<QString, QColor>::const_iterator it = g_xOpt.m_vColorsList._find(clColor);
-		if(it == g_xOpt.m_vColorsList.end()){
+//		_CPairVector<QString, QColor>::const_iterator it = g_xOpt.m_vColorsList._find(clColor);
+//		if(it == g_xOpt.m_vColorsList.end()){
+//			QString sName = clColor.name();
+//			g_xOpt.m_vColorsList[sName] = clColor;
+//			addColor(sName, clColor);
+//		}
+		if(m_vAddedColors.indexOf(clColor) < 0){
 			QString sName = clColor.name();
-			g_xOpt.m_vColorsList[sName] = clColor;
 			addColor(sName, clColor);
 		}
 		m_clCurrent = clColor;

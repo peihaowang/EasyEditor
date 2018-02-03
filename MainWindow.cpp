@@ -109,6 +109,10 @@ MainWindow::MainWindow(QWidget *parent)
 	m_pActionReplaceText->setShortcut(QKeySequence("Ctrl+H"));
 	QObject::connect(m_pActionReplaceText, SIGNAL(triggered(bool)), this, SLOT(onReplaceText()));
 
+	m_pActionFont = new QAction(this);
+	m_pActionFont->setText("Font ...");
+	QObject::connect(m_pActionFont, SIGNAL(triggered(bool)), this, SLOT(onCustomFont()));
+
 	m_pActionBold = new QAction(this);
 	m_pActionBold->setCheckable(true);
 	m_pActionBold->setText("Bold");
@@ -171,11 +175,23 @@ MainWindow::MainWindow(QWidget *parent)
 //	QObject::connect(m_pComboTextSize, SIGNAL(currentIndexChanged(int)), this, SLOT(onTextSize(int)));
 	QObject::connect(m_pComboTextSize, SIGNAL(editTextChanged(QString)), this, SLOT(onTextSize(QString)));
 
-	m_pBtnTextForeColor = new QToolButtonColor(_CPixmapEx::pixmapFromSvg(":/images/btn_forecolor.svg", QSize(18, 18)), QColor(Qt::black), this);
-	m_pBtnTextForeColor->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	m_pActionTextForeColor = new QActionColor("Foreground Color ...", QIcon(":/images/btn_forecolor.svg"), QColor(Qt::black), this);
+	m_pActionTextForeColor->setTriggerAction(QActionColor::PickColorFromDlg);
+	m_pActionTextForeColor->setEnabled(false);
 
-	m_pBtnTextBackColor = new QToolButtonColor(_CPixmapEx::pixmapFromSvg(":/images/btn_backcolor.svg", QSize(18, 18)), QColor(Qt::transparent), this);
+	m_pActionTextBackColor = new QActionColor("Background Color ...", QIcon(":/images/btn_backcolor.svg"), QColor(Qt::black), this);
+	m_pActionTextBackColor->setTriggerAction(QActionColor::PickColorFromDlg);
+	m_pActionTextBackColor->setEnabled(false);
+
+	m_pBtnTextForeColor = new QToolButtonColor(QIcon(":/images/btn_forecolor.svg"), QColor(Qt::black), this);
+	m_pBtnTextForeColor->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	QObject::connect(m_pActionTextForeColor, SIGNAL(colorChose(QColor)), m_pBtnTextForeColor, SLOT(setCurrentColor(QColor)));
+	QObject::connect(m_pBtnTextForeColor, SIGNAL(colorChose(QColor)), m_pActionTextForeColor, SLOT(setCurrentColor(QColor)));
+
+	m_pBtnTextBackColor = new QToolButtonColor(QIcon(":/images/btn_backcolor.svg"), QColor(Qt::transparent), this);
 	m_pBtnTextBackColor->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	QObject::connect(m_pActionTextBackColor, SIGNAL(colorChose(QColor)), m_pBtnTextBackColor, SLOT(setCurrentColor(QColor)));
+	QObject::connect(m_pBtnTextBackColor, SIGNAL(colorChose(QColor)), m_pActionTextBackColor, SLOT(setCurrentColor(QColor)));
 
 	m_pActionJustifyLeft = new QAction(this);
 	m_pActionJustifyLeft->setCheckable(true);
@@ -333,13 +349,29 @@ MainWindow::MainWindow(QWidget *parent)
 	m_pActionSplitCells->setEnabled(false);
 	m_pActionSplitCells->setText("Split Cells");
 
-	m_pBtnTableBorderColor = new QToolButtonColor(QPixmap(":/images/btn_table_border.png"), QColor(Qt::darkGray), this);
+	m_pActionTableBorderColor = new QActionColor("Border ...", QColor(Qt::darkGray), this);
+	m_pActionTableBorderColor->setTriggerAction(QActionColor::PickColorFromDlg);
+	m_pActionTableBorderColor->setEnabled(false);
+
+	m_pActionCellBackColor = new QActionColor("Fill ...", QColor(Qt::transparent), this);
+	m_pActionCellBackColor->setTriggerAction(QActionColor::PickColorFromDlg);
+	m_pActionCellBackColor->setEnabled(false);
+
+#if not defined(Q_OS_MAC)
+
+	m_pBtnTableBorderColor = new QToolButtonColor(QIcon(":/images/btn_table_border.png"), QColor(Qt::darkGray), this);
 	m_pBtnTableBorderColor->setEnabled(false);
 	m_pBtnTableBorderColor->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	QObject::connect(m_pActionTableBorderColor, SIGNAL(colorChose(QColor)), m_pBtnTableBorderColor, SLOT(setCurrentColor(QColor)));
+	QObject::connect(m_pBtnTableBorderColor, SIGNAL(colorChose(QColor)), m_pActionTableBorderColor, SLOT(setCurrentColor(QColor)));
 
-	m_pBtnCellBackColor = new QToolButtonColor(QPixmap(":/images/btn_cell_background.png"), QColor(Qt::transparent), this);
+	m_pBtnCellBackColor = new QToolButtonColor(QIcon(":/images/btn_cell_background.png"), QColor(Qt::transparent), this);
 	m_pBtnCellBackColor->setEnabled(false);
 	m_pBtnCellBackColor->setToolButtonStyle(Qt::ToolButtonIconOnly);
+	QObject::connect(m_pActionCellBackColor, SIGNAL(colorChose(QColor)), m_pBtnCellBackColor, SLOT(setCurrentColor(QColor)));
+	QObject::connect(m_pBtnCellBackColor, SIGNAL(colorChose(QColor)), m_pActionCellBackColor, SLOT(setCurrentColor(QColor)));
+
+#endif
 
 	m_pActionWidenCols = new QAction(this);
 	m_pActionWidenCols->setEnabled(false);
@@ -389,6 +421,8 @@ MainWindow::MainWindow(QWidget *parent)
 	{
 		//Format menu
 		QMenu* pMenu = pMB->addMenu("&Format");
+		pMenu->addAction(m_pActionFont);
+		pMenu->addSeparator();
 		pMenu->addAction(m_pActionBold);
 		pMenu->addAction(m_pActionItalic);
 		pMenu->addAction(m_pActionUnderline);
@@ -397,6 +431,9 @@ MainWindow::MainWindow(QWidget *parent)
 		pMenu->addSeparator();
 		pMenu->addAction(m_pActionSubscript);
 		pMenu->addAction(m_pActionSuperscript);
+		pMenu->addSeparator();
+		pMenu->addAction(m_pActionTextForeColor);
+		pMenu->addAction(m_pActionTextBackColor);
 	}
 	{
 		//Paragraph menu
@@ -439,6 +476,9 @@ MainWindow::MainWindow(QWidget *parent)
 		pMenu->addSeparator();
 		pMenu->addAction(m_pActionMergeCells);
 		pMenu->addAction(m_pActionSplitCells);
+		pMenu->addSeparator();
+		pMenu->addAction(m_pActionTableBorderColor);
+		pMenu->addAction(m_pActionCellBackColor);
 		pMenu->addSeparator();
 		pMenu->addAction(m_pActionWidenCols);
 		pMenu->addAction(m_pActionNarrowCols);
@@ -571,6 +611,8 @@ void MainWindow::makeConnections(_CMyRichEdit* pPrevEdit, _CMyRichEdit* pNewEdit
 		makeUniqueConnection(m_pActionStrikeOut, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(toggleFontStrikeOut()));
 		makeUniqueConnection(m_pActionSubscript, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(toggleFontSubscript()));
 		makeUniqueConnection(m_pActionSuperscript, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(toggleFontSuperscript()));
+		makeUniqueConnection(m_pActionTextForeColor, SIGNAL(colorChose(QColor)), pPrevEdit, pNewEdit, SLOT(setTextForeground(QColor)));
+		makeUniqueConnection(m_pActionTextBackColor, SIGNAL(colorChose(QColor)), pPrevEdit, pNewEdit, SLOT(setTextBackground(QColor)));
 		makeUniqueConnection(m_pBtnTextForeColor, SIGNAL(colorChose(QColor)), pPrevEdit, pNewEdit, SLOT(setTextForeground(QColor)));
 		makeUniqueConnection(m_pBtnTextBackColor, SIGNAL(colorChose(QColor)), pPrevEdit, pNewEdit, SLOT(setTextBackground(QColor)));
 		makeUniqueConnection(m_pActionJustifyLeft, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(justifyLeft()));
@@ -591,8 +633,12 @@ void MainWindow::makeConnections(_CMyRichEdit* pPrevEdit, _CMyRichEdit* pNewEdit
 		makeUniqueConnection(m_pActionRemoveCols, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(removeCols()));
 		makeUniqueConnection(m_pActionMergeCells, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(mergeTableCells()));
 		makeUniqueConnection(m_pActionSplitCells, SIGNAL(triggered(bool)), pPrevEdit, pNewEdit, SLOT(splitTableCells()));
+		makeUniqueConnection(m_pActionTableBorderColor, SIGNAL(colorChose(QColor)), pPrevEdit, pNewEdit, SLOT(setTableBorderColor(QColor)));
+		makeUniqueConnection(m_pActionCellBackColor, SIGNAL(colorChose(QColor)), pPrevEdit, pNewEdit, SLOT(setCellsBackgroundColor(QColor)));
+#if not defined(Q_OS_MAC)
 		makeUniqueConnection(m_pBtnTableBorderColor, SIGNAL(colorChose(QColor)), pPrevEdit, pNewEdit, SLOT(setTableBorderColor(QColor)));
 		makeUniqueConnection(m_pBtnCellBackColor, SIGNAL(colorChose(QColor)), pPrevEdit, pNewEdit, SLOT(setCellsBackgroundColor(QColor)));
+#endif
 
 		makeUniqueConnection(m_pPanelFindReplace, SIGNAL(highlightOccurrences(QString,bool,bool,bool)), pPrevEdit, pNewEdit, SLOT(highlightOccurrences(QString,bool,bool,bool)));
 		makeUniqueConnection(m_pPanelFindReplace, SIGNAL(findNext(QString,bool,bool,bool,bool,bool)), pPrevEdit, pNewEdit, SLOT(findNext(QString,bool,bool,bool,bool,bool)));
@@ -641,6 +687,8 @@ void MainWindow::updateEditActionsState()
 	m_pActionSuperscript->setEnabled(bHasEditor);
 	m_pComboTextFamily->setEnabled(bHasEditor);
 	m_pComboTextSize->setEnabled(bHasEditor);
+	m_pActionTextForeColor->setEnabled(bHasEditor);
+	m_pActionTextBackColor->setEnabled(bHasEditor);
 	m_pBtnTextForeColor->setEnabled(bHasEditor);
 	m_pBtnTextBackColor->setEnabled(bHasEditor);
 	m_pActionJustifyLeft->setEnabled(bHasEditor);
@@ -667,8 +715,12 @@ void MainWindow::updateEditActionsState()
 	m_pActionRemoveCols->setEnabled(bHasEditor);
 	m_pActionMergeCells->setEnabled(bHasEditor);
 	m_pActionSplitCells->setEnabled(bHasEditor);
+	m_pActionTableBorderColor->setEnabled(bHasEditor);
+	m_pActionCellBackColor->setEnabled(bHasEditor);
+#if not defined(Q_OS_MAC)
 	m_pBtnTableBorderColor->setEnabled(bHasEditor);
 	m_pBtnCellBackColor->setEnabled(bHasEditor);
+#endif
 	m_pActionWidenCols->setEnabled(bHasEditor);
 	m_pActionNarrowCols->setEnabled(bHasEditor);
 	m_pActionEditHyperlink->setEnabled(bHasEditor);
@@ -933,6 +985,18 @@ void MainWindow::onFindPanelVisibilityChanged(bool bVisible)
 	if(!bVisible && m_pCurrentEdit) m_pCurrentEdit->setFocus();
 }
 
+void MainWindow::onCustomFont()
+{
+	if(m_pCurrentEdit){
+		QFontDialog dlg(m_pCurrentEdit->currentFont(), this);
+		dlg.setWindowTitle("Select font for the currently selected text");
+		if(dlg.exec() == QFontDialog::Accepted){
+			QFont ftSelected = dlg.currentFont();
+			m_pCurrentEdit->setCurrentFont(ftSelected);
+		}
+	}
+}
+
 void MainWindow::onUnderline()
 {
 	if(m_pCurrentEdit){
@@ -1194,8 +1258,12 @@ void MainWindow::onCellsSelectionChanged(int nRowFirst, int nRowCount, int nColF
 	m_pActionRemoveCols->setEnabled(bTableFocused);
 	m_pActionMergeCells->setEnabled(bCellsSelected);
 	m_pActionSplitCells->setEnabled(bTableFocused);
+	m_pActionTableBorderColor->setEnabled(bTableFocused);
+	m_pActionCellBackColor->setEnabled(bTableFocused);
+#if not defined(Q_OS_MAC)
 	m_pBtnTableBorderColor->setEnabled(bTableFocused);
 	m_pBtnCellBackColor->setEnabled(bTableFocused);
+#endif
 	m_pActionWidenCols->setEnabled(bTableFocused);
 	m_pActionNarrowCols->setEnabled(bTableFocused);
 }

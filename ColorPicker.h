@@ -24,6 +24,7 @@ protected:
 	bool		m_bColorCheckable;
 
 	QColor		m_clCurrent;
+	QList<QColor>	m_vAddedColors;
 
 protected:
 

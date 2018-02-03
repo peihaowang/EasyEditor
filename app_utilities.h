@@ -996,14 +996,17 @@ public:
 
 	static QPixmap makeColorBlock(const QColor& clColor, const QSize& szSize, Qt::BrushStyle nFillStyle = Qt::SolidPattern, bool bFrameless = false, const QColor& clBorderColor = QColor(Qt::black), Qt::PenStyle nBorderStyle = Qt::SolidLine, bool bRoundedBorder = false, qreal nRoundedRadius = 0.0)
 	{
-		QPixmap xImg(szSize); xImg.fill(Qt::transparent);
+		QSize szImg = szSize; if(QApplication::testAttribute(Qt::AA_UseHighDpiPixmaps)) szImg *= 2;
+		QPixmap xImg(szImg); xImg.fill(Qt::transparent);
+		if(QApplication::testAttribute(Qt::AA_UseHighDpiPixmaps)) xImg.setDevicePixelRatio(2.0);
 		QPainter xPainter(&xImg);
+		xPainter.setRenderHint(QPainter::Antialiasing, true);
 
 		if(!bFrameless) xPainter.setPen(QPen(QBrush(clBorderColor), 1, nBorderStyle));
 		else xPainter.setPen(QPen(Qt::NoPen));
 
 		xPainter.setBrush(QBrush(clColor, nFillStyle));
-		QRect rect(0, 0, xImg.width() - 1, xImg.height() - 1);
+		QRect rect(0, 0, szSize.width(), szSize.height());
 
 		if(bRoundedBorder) xPainter.drawRoundedRect(rect, nRoundedRadius, nRoundedRadius);
 		else xPainter.drawRect(rect);

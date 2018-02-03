@@ -38,6 +38,8 @@ public:
 	QString				m_sPathToOpenFile;
 	QString				m_sPathToInsImage;
 
+	QSize				m_szIconSize;
+
 protected:
 
 	void _init(void);

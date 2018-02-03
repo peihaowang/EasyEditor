@@ -9,6 +9,61 @@
 class QGridLayout;
 class QColorPicker;
 
+class QActionColor : public QAction
+{
+	Q_OBJECT
+
+public:
+
+	enum _TAction{
+		ApplyCurrentColor = 0
+		, PickColorFromDlg
+	};
+
+protected:
+
+	_TAction		m_iAction;
+
+	QIcon			m_xIcon;
+	QSize			m_szIcon;
+	QColor			m_clSelected;
+
+	QString			m_sDlgTitle;
+
+protected:
+
+	void setIconForColorBtn(const QColor& clColor);
+
+public:
+
+	QActionColor(const QString& sText, const QColor& clInit = QColor(Qt::transparent), QObject* parent = NULL);
+	QActionColor(const QString& sText, const QIcon& xIcon, const QColor& clInit = QColor(Qt::transparent), QObject* parent = NULL);
+	QActionColor(const QIcon& xIcon, const QColor& clInit = QColor(Qt::transparent), QObject* parent = NULL);
+
+	_TAction triggerAction() const {return m_iAction;}
+	void setTriggerAction(_TAction iAction){m_iAction = iAction;}
+
+	QString colorDialogTitle() const {return m_sDlgTitle;}
+	void setColorDialogTitle(const QString& sTitle){m_sDlgTitle = sTitle;}
+
+	QColor currentColor() const {return m_clSelected;}
+
+signals:
+
+	void colorChose(const QColor& clColor);
+
+protected slots:
+
+	void onTriggered();
+
+public slots:
+
+	void setCurrentColor(const QColor& clCurrent){m_clSelected = clCurrent; setIconForColorBtn(clCurrent);}
+
+};
+
+///////////////////////////////////////////////////////////
+
 class QMenuColor : public QMenu
 {
 
@@ -17,10 +72,6 @@ class QMenuColor : public QMenu
 protected:
 
 	QColorPicker *	m_pColorPicker;
-
-protected:
-
-	void addColor(const QString& sName, const QColor& clColor);
 
 public:
 
@@ -36,38 +87,22 @@ protected slots:
 
 };
 
+///////////////////////////////////////////////////////////
+
 class QToolButtonColor : public QToolButton
 {
 	Q_OBJECT
 
-public:
-
-	enum _TMarkPosition{
-		Left = 1
-		, Right
-		, Top
-		, Bottom
-	};
-
 protected:
 
-	QPixmap			m_xIcon;
-	QColor			m_clSelected;
-	_TMarkPosition		m_iPosition;
-
-	QAction *		m_pDefAction;
+	QActionColor *		m_pDefAction;
 	QMenuColor *		m_pMenuColor;
 
-protected:
-
-	void setIconForColorBtn(const QColor& clColor);
-
 public:
 
-	QToolButtonColor(const QPixmap& xIcon, const QColor& clInit, QWidget* parent);
+	QToolButtonColor(const QIcon& xIcon, const QColor& clInit, QWidget* parent);
 
-	_TMarkPosition markPosition() const {return m_iPosition;}
-	void setMarkPosition(_TMarkPosition iPosition){m_iPosition = iPosition;}
+	QColor currentColor() const {return m_pDefAction->currentColor();}
 
 signals:
 
@@ -75,8 +110,11 @@ signals:
 
 protected slots:
 
-	void onDefActionTriggered(){onChooseColor(m_clSelected);}
 	void onChooseColor(const QColor& clColor);
+
+public slots:
+
+	void setCurrentColor(const QColor& clCurrent){m_pDefAction->setCurrentColor(clCurrent);}
 
 };
 

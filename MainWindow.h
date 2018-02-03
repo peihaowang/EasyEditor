@@ -5,9 +5,11 @@
 #include <QMainWindow>
 
 class QAction;
+class QActionColor;
 class QActionGroup;
 class QToolButton;
 class QToolButtonColor;
+class QMenuColor;
 class QMenuUnderline;
 class QComboBox;
 class QFontComboBox;
@@ -47,6 +49,7 @@ protected:
 	bool				m_bTextSizeSetable;
 	QComboBox *			m_pComboTextSize;
 
+	QAction *			m_pActionFont;
 	QAction *			m_pActionBold;
 	QAction *			m_pActionItalic;
 	QAction *			m_pActionUnderline;
@@ -56,6 +59,8 @@ protected:
 	QAction *			m_pActionSubscript;
 	QAction *			m_pActionSuperscript;
 
+	QActionColor *			m_pActionTextForeColor;
+	QActionColor *			m_pActionTextBackColor;
 	QToolButtonColor *		m_pBtnTextForeColor;
 	QToolButtonColor *		m_pBtnTextBackColor;
 
@@ -88,8 +93,12 @@ protected:
 	QAction *			m_pActionRemoveCols;
 	QAction *			m_pActionMergeCells;
 	QAction *			m_pActionSplitCells;
+	QActionColor *			m_pActionTableBorderColor;
+	QActionColor *			m_pActionCellBackColor;
+#if not defined(Q_OS_MAC)
 	QToolButtonColor *		m_pBtnTableBorderColor;
 	QToolButtonColor *		m_pBtnCellBackColor;
+#endif
 	QAction *			m_pActionWidenCols;
 	QAction *			m_pActionNarrowCols;
 
@@ -142,6 +151,8 @@ protected slots:
 	void onFindText();
 	void onReplaceText();
 	void onFindPanelVisibilityChanged(bool bVisible);
+
+	void onCustomFont();
 
 	void onUnderline();
 	void onSetUnderlineColor(const QColor& clColor);
