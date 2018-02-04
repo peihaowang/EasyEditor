@@ -420,7 +420,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	m_pActionGitHub = new QAction(this);
 	m_pActionGitHub->setText("EasyEditor on GitHub");
-	QObject::connect(m_pActionCancelHyperlink, SIGNAL(triggered(bool)), this, SLOT(onViewGitHub()));
+	QObject::connect(m_pActionGitHub, SIGNAL(triggered(bool)), this, SLOT(onViewGitHub()));
 
 	m_pActionAboutQt = new QAction(this);
 	m_pActionAboutQt->setMenuRole(QAction::AboutQtRole);
