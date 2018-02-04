@@ -16,6 +16,20 @@ git clone git@github.com:peihaowang/EasyEditor.git
 
 You may need to learn about [Qt Framework](http://doc.qt.io/qt-5/) and [Qt Creator](http://doc.qt.io/qtcreator/index.html) before you get started to compile the source code and run *EasyEditor*.
 
+## Extension from Qt
+Qt has implemented QTextEdit and QTextDocument for basic rich text editing and formatting. And *EasyEditor* also provides a demonstration to implement advanced editing and formatting features, as well as some other improvements on user interface and operation. In *EasyEditor*, you may see how to implement:
+1. Storage of embedded images.
+2. Transformation of images.
+3. Hierarchical lists.
+4. Merge/split cells in tables.
+5. Change border/fill color of tables.
+6. Usage of SVG icons on toolbar.
+7. Custom undo/redo stack.
+8. Traverse and parse XML documents.
+9. Custom popup menu.
+10. Convert HTML text to PDF documents.
+11. And more ...
+
 ## Support
 [Email to us](mailto:wangpeihao@gmail.com) for bug report and technical support.
 
