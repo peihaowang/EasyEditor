@@ -13,11 +13,27 @@ QColorPicker::QColorPicker(QWidget* parent)
 
 	QAction* pTransparentColor = new QAction(this);
 	pTransparentColor->setText("Transparent");
+	{
+		QSize szIcon = QSize(16, 14); QSize szImg = szIcon;
+		if(QApplication::testAttribute(Qt::AA_UseHighDpiPixmaps)) szImg *= 2;
+		QPixmap xPixmap(szImg); xPixmap.fill(Qt::transparent);
+		if(QApplication::testAttribute(Qt::AA_UseHighDpiPixmaps)) xPixmap.setDevicePixelRatio(2.0);
+		QPainter xPainter(&xPixmap);
+		xPainter.setPen(QPen(Qt::black));
+		xPainter.save();
+		xPainter.setBrush(QBrush(Qt::white));
+		xPainter.drawRect(QRect(0, 0, szIcon.width() - 1, szIcon.height() - 1));
+		xPainter.restore();
+
+		xPainter.setRenderHint(QPainter::Antialiasing, true);
+		xPainter.drawLine(0, 0, szIcon.width() - 1, szIcon.height() - 1);
+		pTransparentColor->setIcon(QIcon(xPixmap));
+	}
 	pTransparentColor->setData(QVariant(QColor(Qt::transparent)));
 	QObject::connect(pTransparentColor, SIGNAL(triggered()), this, SLOT(onTransparentColor()));
 	m_pBtnTransparent = new QToolButton(this);
 	m_pBtnTransparent->setDefaultAction(pTransparentColor);
-	m_pBtnTransparent->setToolButtonStyle(Qt::ToolButtonTextOnly);
+	m_pBtnTransparent->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	m_pBtnTransparent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 	m_pBtnTransparent->setAutoRaise(true);
 #if defined(Q_OS_MAC)
@@ -55,12 +71,17 @@ QColorPicker::QColorPicker(QWidget* parent)
 	);
 #endif
 
+	QHBoxLayout* pLayoutTransparent = new QHBoxLayout;
+	pLayoutTransparent->addStretch();
+	pLayoutTransparent->addWidget(m_pBtnTransparent);
+	pLayoutTransparent->addStretch();
+
 	QVBoxLayout* pMainLayout = new QVBoxLayout;
 	pMainLayout->setAlignment(Qt::AlignCenter);
 	pMainLayout->setContentsMargins(5, 5, 5, 5);
 	pMainLayout->setSpacing(2);
 
-	pMainLayout->addWidget(m_pBtnTransparent);
+	pMainLayout->addLayout(pLayoutTransparent);
 	pMainLayout->addLayout(m_pGridLayout);
 	pMainLayout->addWidget(pMoreColorBtn);
 

@@ -1,4 +1,5 @@
 #include <math.h>
+#include <QPrinter>
 #include "common_headers.h"
 
 #include "MyRichEdit.h"
@@ -128,18 +129,29 @@ void _CMyRichEdit::saveAs(const QString& sFn) const
 	_CTextFile::saveUtf8(sFn, sContent, true);
 }
 
-void _CMyRichEdit::exportAsHtml(const QString &sFn) const
+void _CMyRichEdit::exportAsHtml(const QString& sFn) const
 {
 	m_pTextDocument->cleanUnlinkedImages();
 	QString sHtml = m_pTextDocument->convertToHtml();
 	_CTextFile::saveUtf8(sFn, sHtml, true);
 }
 
-void _CMyRichEdit::exportAsPdf(const QString &sFn) const
+void _CMyRichEdit::exportAsPdf(const QString& sFn) const
 {
-//	m_pTextDocument->cleanUnlinkedImages();
-//	QString sHtml = m_pTextDocument->convertToHtml();
-//	_CTextFile::saveUtf8(sFn, sHtml, true);
+	//2018.2.4 Printer mode;
+	QPrinter::PrinterMode iMode=QPrinter::HighResolution;
+	//2018.2.4 Output format;
+	QPrinter::OutputFormat iFmt=QPrinter::PdfFormat;
+	//2018.2.4 Paper size;
+	QPrinter::PaperSize iPaper=QPrinter::A4;
+
+	QPrinter xPrinter(iMode);
+	xPrinter.setOutputFileName(sFn);
+	xPrinter.setPageMargins(10, 10, 10, 10, QPrinter::Millimeter);
+	xPrinter.setOutputFormat(iFmt);
+	xPrinter.setPaperSize(iPaper);
+
+	m_pTextDocument->print(&xPrinter);
 }
 
 void _CMyRichEdit::exportAsPlainText(const QString &sFn) const

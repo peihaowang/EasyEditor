@@ -54,6 +54,8 @@ public:
 	void load(const QString& sIniFn);
 	void saveIni(const QString& sIniFn);
 
+	QIcon getIconForToolBar(const QString& sFilename);
+
 };
 
 extern _CAppSettings g_xOpt;

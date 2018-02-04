@@ -47,6 +47,9 @@ protected:
 	QAction *			m_pActionFindText;
 	QAction *			m_pActionReplaceText;
 
+	QAction *			m_pActionEditHyperlink;
+	QAction *			m_pActionCancelHyperlink;
+
 	bool				m_bTextFamilySetable;
 	QFontComboBox *			m_pComboTextFamily;
 
@@ -100,15 +103,12 @@ protected:
 	QAction *			m_pActionSplitCells;
 	QActionColor *			m_pActionTableBorderColor;
 	QActionColor *			m_pActionCellBackColor;
-#if not defined(Q_OS_MAC)
+#if !defined(Q_OS_MAC)
 	QToolButtonColor *		m_pBtnTableBorderColor;
 	QToolButtonColor *		m_pBtnCellBackColor;
 #endif
 	QAction *			m_pActionWidenCols;
 	QAction *			m_pActionNarrowCols;
-
-	QAction *			m_pActionEditHyperlink;
-	QAction *			m_pActionCancelHyperlink;
 
 	QAction *			m_pActionGitHub;
 	QAction *			m_pActionAboutQt;

@@ -70,8 +70,8 @@ void QActionColor::setIconForColorBtn(const QColor& clColor)
 		QPixmap xIconOrigin = m_xIcon.pixmap(g_xOpt.m_szIconSize);
 //		xIconOrigin.setDevicePixelRatio(1.0); //2018.2.2 Keep origin pixmap for material usage (painting to another canvas)
 
-		QRect rcIconTarget(0, 0, nImgWidth - 1, nImgHeight - nRibbonHeight);		//2018.2.2 Display level
-		QRect rcIconSource(0, 0, nImgWidth * 2, (nImgHeight - nRibbonHeight) * 2);	//2018.2.2 Pixel level
+		QRect rcIconTarget(0, 0, nImgWidth - 1, nImgHeight - nRibbonHeight);	//2018.2.2 Display level
+		QRect rcIconSource(0, 0, nImgWidth * nDevicePxRatio, (nImgHeight - nRibbonHeight) * nDevicePxRatio);	//2018.2.2 Pixel level
 		QRect rcRibbon(0, nImgHeight - nRibbonHeight, nImgWidth - 1, nRibbonHeight - 1);
 
 		QPainter xPainter(&xPixmap);

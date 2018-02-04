@@ -1,3 +1,4 @@
+#include "app_utilities.h"
 #include "app_settings.h"
 
 void iniGet(const _CKeyValEntries& xKV, const QString& sKey, QColor& xRes, const QColor& xDef)
@@ -263,4 +264,15 @@ void _CAppSettings::saveIni(const QString& sIniFn)
 		_CKeyValEntries xKV; bool bGet=false; _ddx(xKV, bGet); sTxt=xKV;
 	}
 	_CTextFile(sIniFn).saveUtf8(sTxt, true);
+}
+
+QIcon _CAppSettings::getIconForToolBar(const QString& sFilename)
+{
+#if defined(Q_OS_MAC)
+	QString sExt = "svg";
+#else
+	QString sExt = "png";
+#endif
+	QString sFnIcon = _CLocalFile::concatenate(":/images/", _CLocalFile::changeExtension(sFilename, sExt));
+	return QIcon(sFnIcon);
 }
