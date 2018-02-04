@@ -274,5 +274,9 @@ QIcon _CAppSettings::getIconForToolBar(const QString& sFilename)
 	QString sExt = "png";
 #endif
 	QString sFnIcon = _CLocalFile::concatenate(":/images/", _CLocalFile::changeExtension(sFilename, sExt));
-	return QIcon(sFnIcon);
+	QIcon xIcon;
+	if(QFileInfo(sFnIcon).exists()){
+		xIcon = QIcon(sFnIcon);
+	}
+	return xIcon;
 }

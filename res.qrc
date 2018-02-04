@@ -78,5 +78,7 @@
         <file>images/ico_dropdown.svg</file>
         <file>images/ico_dropdown_white.svg</file>
         <file>images/ico_app_logo.ico</file>
+        <file>images/btn_remove_rows.svg</file>
+        <file>images/btn_ins_row_before.svg</file>
     </qresource>
 </RCC>

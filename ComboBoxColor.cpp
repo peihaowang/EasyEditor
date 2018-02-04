@@ -7,6 +7,7 @@ QComboBoxColor::QComboBoxColor(QWidget* parent)
 	, m_bCanPickMoreColor(true)
 	, m_iLastItem(-1)
 {
+	QComboBox::setIconSize(QSize(16, 14));
 	_CPairVector<QString, QColor>::const_iterator it;
 	addColor(-1, "Transparent", Qt::transparent);
 	__EACH(it, g_xOpt.m_vColorsList){
@@ -54,17 +55,30 @@ void QComboBoxColor::addColor(int nPos, const QString& sName, const QColor& clCo
 		if(clColor.alpha() != 0){
 			xPixmap = _CStandardPixmapMaker::makeColorBlock(clColor, szIcon, Qt::SolidPattern, false, Qt::black, Qt::SolidLine, true, 0);
 		}else{
-			xPixmap = QPixmap(szIcon); xPixmap.fill(Qt::white);
-
+			//2018.2.4 Painting adapted to Mac retina monitor
+			QSize szImg = szIcon; if(QApplication::testAttribute(Qt::AA_UseHighDpiPixmaps)) szImg *= 2;
+			xPixmap = QPixmap(szImg); xPixmap.fill(Qt::transparent);
+			if(QApplication::testAttribute(Qt::AA_UseHighDpiPixmaps)) xPixmap.setDevicePixelRatio(2.0);
 			QPainter xPainter(&xPixmap);
+			xPainter.setRenderHint(QPainter::Antialiasing, true);
+
 			xPainter.setPen(QPen(Qt::black));
 			xPainter.save();
 			xPainter.setBrush(QBrush(Qt::white));
-			xPainter.drawRect(QRect(0, 0, xPixmap.width() - 1, xPixmap.height() - 1));
+			xPainter.drawRect(QRect(0, 0, szIcon.width(), szIcon.height()));
 			xPainter.restore();
 
-			xPainter.setRenderHint(QPainter::Antialiasing, true);
-			xPainter.drawLine(0, 0, xPixmap.width() - 1, xPixmap.height() - 1);
+			xPainter.drawLine(0, 0, szIcon.width(), szIcon.height());
+
+//			QPainter xPainter(&xPixmap);
+//			xPainter.setPen(QPen(Qt::black));
+//			xPainter.save();
+//			xPainter.setBrush(QBrush(Qt::white));
+//			xPainter.drawRect(QRect(0, 0, xPixmap.width() - 1, xPixmap.height() - 1));
+//			xPainter.restore();
+
+//			xPainter.setRenderHint(QPainter::Antialiasing, true);
+//			xPainter.drawLine(0, 0, xPixmap.width() - 1, xPixmap.height() - 1);
 		}
 		xIcon = QIcon(xPixmap);
 	}

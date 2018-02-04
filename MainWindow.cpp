@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
 	, m_bTextFamilySetable(true)
 	, m_bTextSizeSetable(true)
 {
-	QMainWindow::setWindowIcon(g_xOpt.getIconForToolBar("ico_app_logo.ico"));
+	QMainWindow::setWindowIcon(QIcon(":/images/ico_app_logo.ico"));
 
 	m_pTabDocuments = new QTabWidget(this);
 	m_pTabDocuments->setDocumentMode(true);
@@ -608,6 +608,10 @@ MainWindow::MainWindow(QWidget *parent)
 	pTB->addWidget("Color", m_pBtnTextForeColor);
 	pTB->addWidget("Color", m_pBtnTextBackColor);
 
+	pTB->addAction("Alignment", m_pActionJustifyLeft);
+	pTB->addAction("Alignment", m_pActionJustifyCenter);
+	pTB->addAction("Alignment", m_pActionJustifyRight);
+
 	pTB->addAction("Indent", m_pActionOutdent);
 	pTB->addAction("Indent", m_pActionIndent);
 
@@ -619,6 +623,8 @@ MainWindow::MainWindow(QWidget *parent)
 	pTB->addAction("Image", m_pActionScaleImage);
 
 	pTB->addAction("Table", m_pActionInsTable);
+	pTB->addWidget("Table", pBtnInsTableEle);
+	pTB->addWidget("Table", pBtnRemoveTableEle);
 
 	QMainWindow::addToolBar(Qt::TopToolBarArea, pTB);
 #else

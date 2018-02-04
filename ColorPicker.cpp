@@ -19,25 +19,27 @@ QColorPicker::QColorPicker(QWidget* parent)
 		QPixmap xPixmap(szImg); xPixmap.fill(Qt::transparent);
 		if(QApplication::testAttribute(Qt::AA_UseHighDpiPixmaps)) xPixmap.setDevicePixelRatio(2.0);
 		QPainter xPainter(&xPixmap);
+		xPainter.setRenderHint(QPainter::Antialiasing, true);
+
 		xPainter.setPen(QPen(Qt::black));
 		xPainter.save();
 		xPainter.setBrush(QBrush(Qt::white));
-		xPainter.drawRect(QRect(0, 0, szIcon.width() - 1, szIcon.height() - 1));
+		xPainter.drawRect(QRect(0, 0, szIcon.width(), szIcon.height()));
 		xPainter.restore();
 
-		xPainter.setRenderHint(QPainter::Antialiasing, true);
-		xPainter.drawLine(0, 0, szIcon.width() - 1, szIcon.height() - 1);
+		xPainter.drawLine(0, 0, szIcon.width(), szIcon.height());
 		pTransparentColor->setIcon(QIcon(xPixmap));
 	}
 	pTransparentColor->setData(QVariant(QColor(Qt::transparent)));
 	QObject::connect(pTransparentColor, SIGNAL(triggered()), this, SLOT(onTransparentColor()));
 	m_pBtnTransparent = new QToolButton(this);
+	m_pBtnTransparent->setIconSize(QSize(16, 14));
 	m_pBtnTransparent->setDefaultAction(pTransparentColor);
 	m_pBtnTransparent->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	m_pBtnTransparent->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 	m_pBtnTransparent->setAutoRaise(true);
 #if defined(Q_OS_MAC)
-	m_pBtnTransparent->setStyleSheet("QToolButton{background-color: transparent; border: 0px none transparent; padding: 2px;}"
+	m_pBtnTransparent->setStyleSheet("QToolButton{background-color: transparent; border: 1px solid transparent; padding: 2px;}"
 		"QToolButton::hover{background-color: rgba(200, 200, 200, 150); border: 1px solid gray; border-radius: 2px;}"
 		"QToolButton::pressed{background-color: rgba(150, 150, 150, 150); border: 1px solid gray; border-radius: 2px;}"
 	);
