@@ -16,7 +16,7 @@ git clone git@github.com:peihaowang/EasyEditor.git
 
 You may need to learn about [Qt Framework](http://doc.qt.io/qt-5/) and [Qt Creator](http://doc.qt.io/qtcreator/index.html) before you get started to compile the source code and run *EasyEditor*.
 
-## Extension from Qt
+## Extension from Qt5
 Qt has implemented QTextEdit and QTextDocument for basic rich text editing and formatting. And *EasyEditor* also provides a demonstration to implement advanced editing and formatting features, as well as some other improvements on user interface and operation. In *EasyEditor*, you may see how to implement:
 1. Storage of embedded images.
 2. Transformation of images.
